@@ -1,0 +1,21 @@
+# Ignora tudo dentro da pasta wordpress
+/wordpress/
+
+# Ignora dados do MySQL
+/mysql-data/
+
+# Ignora backups locais
+/backups/
+
+# Ignora arquivos temporários de sistema e editores
+*.log
+*.tmp
+*.swp
+*.DS_Store
+*.idea/
+*.vscode/
+
+# Ignora arquivos de cache ou build (se aplicável)
+node_modules/
+dist/
+vendor/
