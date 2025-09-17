@@ -17,7 +17,7 @@ Ambiente completo de desenvolvimento WordPress/WooCommerce com Docker, otimizado
 
 ## ✨ Características
 
-- **WordPress 6.4** com PHP 8.2 e Apache
+- **WordPress Latest** com PHP 8.2 e Apache
 - **WooCommerce** pré-instalado e configurado
 - **MySQL 8.0** com configurações otimizadas para desenvolvimento
 - **phpMyAdmin** para gerenciamento do banco de dados

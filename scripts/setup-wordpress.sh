@@ -117,6 +117,9 @@ if ! wp user get testuser --allow-root 2>/dev/null; then
     echo "✅ Usuário de teste criado (testuser/test123)!"
 fi
 
+wp plugin install wordpress-importer --activate
+wp import /tmp/sample_products.xml --authors=create
+
 # Configurar opções de desenvolvimento
 echo "🛠️ Configurando opções de desenvolvimento..."
 wp option update blog_public 0 --allow-root  # Desencorajar indexação

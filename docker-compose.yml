@@ -47,11 +47,12 @@ services:
         ini_set('max_input_vars', 3000);
     volumes:
       - ./wordpress:/var/www/html
-      - ./wp-content/plugins/plugin-template:/var/www/html/wp-content/plugins/plugin-template
-      - ./wp-content/themes/hello-theme-child-master:/var/www/html/wp-content/themes/hello-theme-child-master
-      - ./wp-content/uploads:/var/www/html/wp-content/uploads
+      # - ./wp-content/plugins/plugin-template:/var/www/html/wp-content/plugins/plugin-template
+      # - ./wp-content/themes/hello-theme-child-master:/var/www/html/wp-content/themes/hello-theme-child-master
+      # - ./wp-content/uploads:/var/www/html/wp-content/uploads
       - ./config/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./config/apache.conf:/etc/apache2/sites-available/000-default.conf:ro
+      - ./woo-sample-data:/tmp/sample-data
       - ./scripts:/scripts:ro
     ports:
       - "${WORDPRESS_PORT}:80"

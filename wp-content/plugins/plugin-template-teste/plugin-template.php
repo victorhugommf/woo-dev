@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: Plugin Template 2
+ * Plugin Name: Plugin Template 123
  * Plugin URI: https://example.com/plugin-template
  * Description: Template básico para desenvolvimento de plugins WordPress/WooCommerce
  * Version: 1.0.0
