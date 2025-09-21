@@ -1,0 +1,17 @@
+{
+    "name": "CloudXM NFS-e",
+    "version": "{{VERSION}}",
+    "download_url": "https://plugins.cloudxm.com.br/woocommerce-cloudxm-nfse/woocommerce-cloudxm-nfse-v{{VERSION}}.zip",
+    "details_url": "https://plugins.cloudxm.com.br/woocommerce-cloudxm-nfse/latest.json",
+    "requires": "5.6",
+    "tested": "6.5",
+    "requires_php": "7.4",
+    "last_updated": "{{DATE}}",
+    "author": "CloudXM",
+    "author_profile": "https://cloudxm.com.br",
+    "homepage": "https://cloudxm.com.br/plugins/woocommerce-cloudxm-nfse",
+    "sections": {
+        "description": "Professional CloudXM NFS-e Plugin for WooCommerce - Automated electronic invoice generation and management with governo.br compliance. Features certificate management, XML signing, and government API integration.",
+        "changelog": "Version {{VERSION}}: Updated branding to CloudXM, improved NFS-e generation, enhanced certificate management, updated WordPress and WooCommerce compatibility to latest versions."
+    }
+}

@@ -47,7 +47,7 @@ services:
         ini_set('max_input_vars', 3000);
     volumes:
       - ./wordpress:/var/www/html
-      # - ./wp-content/plugins/plugin-template:/var/www/html/wp-content/plugins/plugin-template
+      - ./wp-content/plugins/woocommerce-cloudxm-nfse:/var/www/html/wp-content/plugins/woocommerce-cloudxm-nfse
       # - ./wp-content/themes/hello-theme-child-master:/var/www/html/wp-content/themes/hello-theme-child-master
       # - ./wp-content/uploads:/var/www/html/wp-content/uploads
       - ./config/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro

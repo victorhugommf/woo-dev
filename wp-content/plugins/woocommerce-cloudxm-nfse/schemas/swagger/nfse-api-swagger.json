@@ -1,0 +1,2992 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "APIs PARA OS CONTRIBUINTES DO ISSQN NO SISTEMA NACIONAL NFS-e",
+    "description": "<p><strong>Protocolo de comunicação:</strong> TLS 1.0, TLS 1.1 e TLS 1.2 com autenticação mútua</p>  <p><strong>Formato para troca de mensagens:</strong> JSON</p>  <p><strong>Formato dos documentos da NFS-e:</strong> XML 1.0  <a href =\"https://www.w3.org/TR/REC-xml\"> (https://www.w3.org/TR/REC-xml)</a> </p>   <p><strong>Codificação de caracteres:</strong> UTF-8</p> <p><strong>Certificado digital:</strong> Emitido por Autoridade Certificadora ICP-Brasil, tipo A1 ou A3, CNPJ ou CPF, com \"Autenticação do Cliente\"</p> <p><strong>Padrão de assinatura dos documentos XML:</strong> XMLDSIG <a href=\"https://www.w3.org/TR/xmldsig-core\">  (https://www.w3.org/TR/xmldsig-core/) </a>  </p>    <p><strong>Padrão de compactação dos documentos XML para troca de mensagens:</strong> GZip com representao base64binary</p><br/>",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+    },
+    {
+      "url": "https://adn.producaorestrita.nfse.gov.br/contribuintes"
+    },
+    {
+      "url": "https://adn.producaorestrita.nfse.gov.br/man/apuracoes"
+    }
+  ],
+  "paths": {
+
+    "/danfse/{chaveAcesso}": {
+      "get": {
+        "tags": [
+          "DANFSe - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna o DANFSe de uma NFS-e a partir de sua chave de acesso.",
+        "operationId": "DANFSe_Get",
+        "parameters": [
+          {
+            "name": "chaveAcesso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/DFe/{NSU}": {
+      "get": {
+        "tags": [
+          "DFe - https://adn.producaorestrita.nfse.gov.br/contribuintes"
+        ],
+        "summary": "Distribui os DF-e para contribuintes relacionados à NFS-e. ",
+        "parameters": [
+          {
+            "name": "NSU",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lote",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/NFSe/{ChaveAcesso}/Eventos": {
+      "get": {
+        "tags": [
+          "DFe - https://adn.producaorestrita.nfse.gov.br/contribuintes"
+        ],
+        "summary": "Distribui os DF-e vinculados à chave de acesso informada",
+        "parameters": [
+          {
+            "name": "ChaveAcesso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+    "/dps/{id}": {
+      "get": {
+        "tags": [
+          "DPS - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna a chave de acesso da NFS-e a partir do identificador do DPS.",
+        "operationId": "Dps_Get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Identificador do DPS",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Foi gerada uma NFS-e com o identificador de DPS informado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DpsGetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador de DPS inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não foi gerada uma NFS-e com o identificador de DPS informado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "DPS - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Verifica se uma NFS-e foi emitida a partir do Id do DPS",
+        "operationId": "Dps_Head",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Identificador do DPS",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Identificador do DPS encontrado",
+            "content": {}
+          },
+          "400": {
+            "description": "Identificador inválido",
+            "content": {}
+          },
+          "404": {
+            "description": "Identificador do DPS número não encontrado",
+            "content": {}
+          }
+        }
+      }
+    },
+
+    "/nfse/{chaveAcesso}/eventos": {
+      "post": {
+        "tags": [
+          "Eventos - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Recepciona o Pedido de Registro de Evento e gera Eventos de NFS-e, crédito, débito e apuração.",
+        "operationId": "Eventos_Post",
+        "parameters": [
+          {
+            "name": "chaveAcesso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Estrutura contendo o pedido de registro de evento compactado\r\n            no padrão GZip com representa\ufffd\ufffdo base64binary",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventosPostRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "O evento da NFS-e foi registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventosPostResponseSucesso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Não foi possível registrar o pedido de evento de NFS-e por violar alguma regra de negócio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuário não tem permiss\ufffdo para acessar os eventos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "eventosPostRequest"
+      }
+    },
+    "/nfse/{ChaveAcesso}/eventos": {
+      "get": {
+        "tags": [
+          "Eventos - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna os Documentos Fiscais de Serviço do tipo Evento vinculados à chave de acesso informada",
+        "parameters": [
+          {
+            "name": "ChaveAcesso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nfse/{ChaveAcesso}/eventos/{tipoevento}": {
+      "get": {
+        "tags": [
+          "Eventos - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna os Documentos Fiscais de Serviço do tipo Evento vinculados à chave de acesso informada",
+        "parameters": [
+          {
+            "name": "ChaveAcesso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoteDistribuicaoNSUResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nfse/{chaveAcesso}/eventos/{tipoEvento}/{numSeqEvento}": {
+      "get": {
+        "tags": [
+          "Eventos - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna NFS-e e seus eventos relacionados a partir da consulta pela chave de acesso da NFS-e.",
+        "operationId": "Eventos_Get",
+        "parameters": [
+          {
+            "name": "chaveAcesso",
+            "in": "path",
+            "description": "Chave de acesso",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tipoEvento",
+            "in": "path",
+            "description": "Tipo de evento",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "enum": [
+                101101,
+                101103,
+                105102,
+                105104,
+                105105,
+                202201,
+                202205,
+                203202,
+                203206,
+                204203,
+                204207,
+                205204,
+                205208,
+                305101,
+                305102,
+                305103,
+                907201,
+                967203
+              ]
+            }
+          },
+          {
+            "name": "numSeqEvento",
+            "in": "path",
+            "description": "N\ufffdmero sequencial do evento. Se informado, os demais parâmetros s\ufffdo obrigat\ufffdrios",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Eventos encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventosPostResponseSucesso"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuário não tem permiss\ufffdo para acessar os eventos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nenhum evento encontrado para a NFS-e",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A requisição violou alguma regra de negócio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/nfse": {
+      "post": {
+        "tags": [
+          "NFS-e - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Recepciona a DPS e Gera a NFS-e de forma síncrona.",
+        "operationId": "NFSe_Post",
+        "requestBody": {
+          "description": "Estrutura contendo um DPS compactado no padrão gZip (base64Binary)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NFSePostRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "A NFS-e foi criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NFSePostResponseSucesso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Não foi possível criar a NFS-e",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NFSePostResponseErro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Certificado digital da transmiss\ufffdo inv\ufffdlido ou fora dos padr\ufffdes da NFS-e",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NFSePostResponseErro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha durante o processamento do DPS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NFSePostResponseErro"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "nfsePostRequest"
+      }
+    },
+    "/nfse/{chaveAcesso}": {
+      "get": {
+        "tags": [
+          "NFS-e - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna a NFS-e a partir da consulta pela chave de acesso correspondente (50 posições).",
+        "operationId": "NFSe_Get",
+        "parameters": [
+          {
+            "name": "chaveAcesso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "NFS-e encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NFSeGetResponseSucesso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A chave de acesso consultada deve conter 50 números.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não foi possível obter o certificado de cliente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chave de acesso não encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseErro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+    "/parametros_municipais/{codigoMunicipio}/{codigoServico}/{competencia}/aliquota": {
+      "get": {
+        "tags": [
+          "Parâmetros Municipais - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna a alíquota do ISSQN parametrizada de um município a partir desta consulta.",
+        "operationId": "Aliquotas_Get",
+        "parameters": [
+          {
+            "name": "codigoMunicipio",
+            "description": "O código do município deve ser composto por sete dígitos.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "codigoServico",
+            "description": "O código do serviço deve ser informado no formato 00.00.00.000.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "competencia",
+            "description": "No formato MM/DD/YYYY",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alíquota recuperada com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaAliquotas"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chamada mal formada. A competência informada não é uma data válida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaAliquotas"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Convênio para o código do município não se encontra na Situação='Ativa'.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaAliquotas"
+                }
+              }
+            }
+          }
+        }
+
+
+      }
+    },
+    "/parametros_municipais/{codigoMunicipio}/{codigoServico}/historicoaliquotas": {
+      "get": {
+        "tags": [ "Parâmetros Municipais - https://sefin.producaorestrita.nfse.gov.br/SefinNacional" ],
+        "summary": "Retorna histórico de alíquotas do ISSQN parametrizadas de um município a partir de um código de município e código de serviço.",
+        "operationId": "Aliquotas_Get",
+        "consumes": [],
+        "produces": [ "application/json" ],
+        "parameters": [
+          {
+            "name": "codigoMunicipio",
+            "description": "O código do município deve ser composto por sete dígitos.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "codigoServico",
+            "description": "O código do serviço deve ser informado no formato 00.00.00.000.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Histório de alíquotas recuperados com sucesso.",
+            "schema": { "$ref": "#/components/schemas/ResultadoConsultaAliquotas" }
+          },
+          "400": {
+            "description": "Chamada mal formada. O código do serviço deve ser informado no formato 00.00.00.000.",
+            "schema": { "$ref": "#/components/schemas/ResultadoConsultaAliquotas" }
+          },
+          "404": {
+            "description": "Convênio para o código do município não se encontra na Situação='Ativa'.",
+            "schema": { "$ref": "#/components/schemas/ResultadoConsultaAliquotas" }
+          }
+        }
+      }
+    },
+    "/parametros_municipais/{codigoMunicipio}/convenio": {
+      "get": {
+        "tags": [
+          "Parâmetros Municipais - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna os parâmetros do convênio de um município a partir desta consulta.",
+        "operationId": "Convenio_Get",
+        "parameters": [
+          {
+            "name": "codigoMunicipio",
+            "description": "O código do município deve ser composto por sete dígitos.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parâmetros do convênio recuperados com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaConfiguracoesConvenio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chamada mal formada. O código do município deve ser composto por sete dígitos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaConfiguracoesConvenio"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Convênio para o código do município não se encontra na Situação='Ativa'.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaConfiguracoesConvenio"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parametros_municipais/{codigoMunicipio}/{codigoServico}/{competencia}/regimes_especiais": {
+      "get": {
+        "tags": [
+          "Parâmetros Municipais - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna os parâmetros de regimes especiais de tributação de um município a partir desta consulta.",
+        "operationId": "RegimesEspeciais_Get",
+        "parameters": [
+          {
+            "name": "codigoMunicipio",
+            "description": "O código do município deve ser composto por sete dígitos.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "codigoServico",
+            "description": "O código do serviço deve ser informado no formato 00.00.00.000.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "competencia",
+            "description": "No formato MM/DD/YYYY",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parâmetros de regimes especiais recuperados com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaRegimesEspeciais"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chamada mal formada. A competência informada não é uma data válida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaRegimesEspeciais"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Convênio para o código do município não se encontra na Situação='Ativa'.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaRegimesEspeciais"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parametros_municipais/{codigoMunicipio}/{competencia}/retencoes": {
+      "get": {
+        "tags": [
+          "Parâmetros Municipais - https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+        ],
+        "summary": "Retorna os parâmetros para retenções do ISSQN de um município a partir desta consulta.",
+        "operationId": "Retencoes_Get",
+        "parameters": [
+          {
+            "name": "codigoMunicipio",
+            "description": "O código do município deve ser composto por sete dígitos.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "competencia",
+            "description": "No formato MM/DD/YYYY",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parâmetros de retenções recuperados com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaRetencoes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chamada mal formada. O código do município deve ser composto por sete dígitos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaRetencoes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Convênio para o código do município não se encontra na Situação='Ativa'.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaRetencoes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parametros_municipais/{codigoMunicipio}/{numeroBeneficio}/{competencia}/beneficio": {
+      "get": {
+        "tags": [ "Parâmetros Municipais - https://sefin.producaorestrita.nfse.gov.br/SefinNacional" ],
+        "summary": "Retorna os parâmetros de um número de benefício municipal a partir desta consulta.",
+        "operationId": "Beneficio_Get",
+        "parameters": [
+          {
+            "name": "codigoMunicipio",
+            "description": "O código do município deve ser composto por sete dígitos.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "numeroBeneficio",
+            "description": "O número do município deve ser composto por onze dígitos.",
+            "in": "path",
+            "required": true,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "competencia",
+            "description": "No formato MM/DD/YYYY",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Benefício recuperado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaBeneficio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chamada mal formada. A competência informada não é uma data válida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaBeneficio"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parâmetros do benefício de número <NumeroBeneficio> não encontrado para a competência.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoConsultaBeneficio"
+                }
+              }
+            }
+          }
+        }
+
+      }
+    }
+
+  },
+  "components": {
+    "schemas": {
+      "DpsGetResponse": {
+        "required": [
+          "chaveAcesso",
+          "dataHoraProcessamento",
+          "idDps",
+          "tipoAmbiente",
+          "versaoAplicativo"
+        ],
+        "type": "object",
+        "properties": {
+          "tipoAmbiente": {
+            "type": "integer",
+            "description": "Tipo de ambiente (1-Produção | 2-Homologação)",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "versaoAplicativo": {
+            "type": "string",
+            "description": "Versão do aplicativo que processou a requisição"
+          },
+          "dataHoraProcessamento": {
+            "type": "string",
+            "description": "Data e hora de processamento da requisição",
+            "format": "date-time",
+            "example": "2020-07-30T17:28:42.576Z"
+          },
+          "idDps": {
+            "type": "string",
+            "description": "Identificador do DPS"
+          },
+          "chaveAcesso": {
+            "type": "string",
+            "description": "Chave de acesso da NFS-e"
+          }
+        },
+        "description": "Estrutura de resposta para consulta de DPS"
+      },
+      "ResponseErro": {
+        "required": [
+          "dataHoraProcessamento",
+          "erro",
+          "tipoAmbiente",
+          "versaoAplicativo"
+        ],
+        "type": "object",
+        "properties": {
+          "tipoAmbiente": {
+            "type": "integer",
+            "description": "Tipo de ambiente (1-Produção | 2-Homologação)",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "versaoAplicativo": {
+            "type": "string",
+            "description": "Versão do aplicativo que processou a requisição"
+          },
+          "dataHoraProcessamento": {
+            "type": "string",
+            "description": "Data e hora de processamento da requisição",
+            "format": "date-time",
+            "example": "2020-07-30T17:28:42.578Z"
+          },
+          "erro": {
+            "$ref": "#/components/schemas/MensagemProcessamento"
+          }
+        },
+        "description": "Estrutura de resposta padrão para erros"
+      },
+      "MensagemProcessamento": {
+        "type": "object",
+        "properties": {
+          "mensagem": {
+            "type": "string"
+          },
+          "parametros": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "codigo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "complemento": {
+            "type": "string"
+          }
+        }
+      },
+      "EventosPostRequest": {
+        "required": [
+          "pedidoRegistroEventoXmlGZipB64"
+        ],
+        "type": "object",
+        "properties": {
+          "pedidoRegistroEventoXmlGZipB64": {
+            "type": "string",
+            "description": "Pedido de registro de evento no formato Xml compactado no padrão gZip (base64Binary)"
+          }
+        },
+        "description": "Estrutura para requisição de pedido de registro de evento"
+      },
+      "EventosPostResponseSucesso": {
+        "required": [
+          "dataHoraProcessamento",
+          "eventoXmlGZipB64",
+          "tipoAmbiente",
+          "versaoAplicativo"
+        ],
+        "type": "object",
+        "properties": {
+          "tipoAmbiente": {
+            "type": "integer",
+            "description": "Tipo de ambiente (1-Produção | 2-Homologação)",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "versaoAplicativo": {
+            "type": "string",
+            "description": "Versão do aplicativo que processou a requisição"
+          },
+          "dataHoraProcessamento": {
+            "type": "string",
+            "description": "Data e hora de processamento da requisição",
+            "format": "date-time",
+            "example": "2020-07-30T17:28:42.581Z"
+          },
+          "eventoXmlGZipB64": {
+            "type": "string",
+            "description": "Evento no formato Xml compactado no padrão gZip (base64Binary)"
+          }
+        },
+        "description": "Estrutura de resposta de sucesso do processamento do pedido de registro de evento\r\ncontendo o evento no formato Xml compactado no padrão gZip(base64Binary)"
+      },
+      "NFSePostRequest": {
+        "required": [
+          "dpsXmlGZipB64"
+        ],
+        "type": "object",
+        "properties": {
+          "dpsXmlGZipB64": {
+            "type": "string",
+            "description": "DPS compactado no padrão gZip (base64Binary)"
+          }
+        },
+        "description": "Estrutura para enviar o DPS para processamento assíncrono"
+      },
+      "NFSePostResponseSucesso": {
+        "required": [
+          "chaveAcesso",
+          "dataHoraProcessamento",
+          "idDps",
+          "nfseXmlGZipB64",
+          "tipoAmbiente",
+          "versaoAplicativo"
+        ],
+        "type": "object",
+        "properties": {
+          "tipoAmbiente": {
+            "type": "integer",
+            "description": "Tipo de ambiente (1-Produção | 2-Homologação)",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "versaoAplicativo": {
+            "type": "string",
+            "description": "Versão do aplicativo que processou a requisição"
+          },
+          "dataHoraProcessamento": {
+            "type": "string",
+            "description": "Data e hora de processamento da requisição",
+            "format": "date-time",
+            "example": "2020-07-30T17:28:42.584Z"
+          },
+          "idDps": {
+            "type": "string",
+            "description": "Identificador do DPS",
+            "readOnly": true
+          },
+          "chaveAcesso": {
+            "type": "string",
+            "description": "Chave de acesso da NFS-e",
+            "readOnly": true
+          },
+          "nfseXmlGZipB64": {
+            "type": "string",
+            "description": "NFS-e em formato Xml compactado no padrão gZip (base64Binary)",
+            "readOnly": true
+          },
+          "alertas": {
+            "type": "array",
+            "description": "Alertas da NFS-e gerada",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/MensagemProcessamento"
+            }
+          }
+        },
+        "description": "Estrutura para resposta de sucesso para a criação da NFS-e síncrona"
+      },
+      "NFSePostResponseErro": {
+        "required": [
+          "dataHoraProcessamento",
+          "erros",
+          "tipoAmbiente",
+          "versaoAplicativo"
+        ],
+        "type": "object",
+        "properties": {
+          "tipoAmbiente": {
+            "type": "integer",
+            "description": "Tipo de ambiente (1-Produção | 2-Homologação)",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "versaoAplicativo": {
+            "type": "string",
+            "description": "Versão do aplicativo que processou a requisição"
+          },
+          "dataHoraProcessamento": {
+            "type": "string",
+            "description": "Data e hora de processamento da requisição",
+            "format": "date-time",
+            "example": "2020-07-30T17:28:42.585Z"
+          },
+          "idDPS": {
+            "type": "string",
+            "description": "Id do DPS (se tiver conseguido capturar do Xml)",
+            "readOnly": true
+          },
+          "erros": {
+            "type": "array",
+            "description": "Erro de processamento do DPS",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/MensagemProcessamento"
+            }
+          }
+        },
+        "description": "Estrutura para resposta de erro no processamento do DPS"
+      },
+      "NFSeGetResponseSucesso": {
+        "required": [
+          "chaveAcesso",
+          "dataHoraProcessamento",
+          "nfseXmlGZipB64",
+          "tipoAmbiente",
+          "versaoAplicativo"
+        ],
+        "type": "object",
+        "properties": {
+          "tipoAmbiente": {
+            "type": "integer",
+            "description": "Tipo de ambiente (1-Produção | 2-Homologação)",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "versaoAplicativo": {
+            "type": "string",
+            "description": "Versão do aplicativo que processou a requisição"
+          },
+          "dataHoraProcessamento": {
+            "type": "string",
+            "description": "Data e hora de processamento da requisição",
+            "format": "date-time",
+            "example": "2020-07-30T17:28:42.586Z"
+          },
+          "chaveAcesso": {
+            "type": "string",
+            "description": "Chave de acesso da NFS-e"
+          },
+          "nfseXmlGZipB64": {
+            "type": "string",
+            "description": "NFS-e em formato Xml compactado no padrão gZip (base64Binary)"
+          }
+        },
+        "description": "Estrutura de resposta para consulta de NFS-e"
+      },
+      "ResultadoConsultaRetencoes": {
+        "type": "object",
+        "properties": {
+          "dataHoraProcessamento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipoAmbiente": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "retencoes": {
+            "$ref": "#/components/schemas/ParametrosRetencao"
+          },
+          "mensagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ParametrosRetencao": {
+        "type": "object",
+        "properties": {
+          "art6": {
+            "$ref": "#/components/schemas/ParametrosArtigoSexto"
+          },
+          "retMun": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParametrosRetencaoMunicipal"
+            }
+          }
+        }
+      },
+      "ParametrosArtigoSexto": {
+        "type": "object",
+        "properties": {
+          "habilitado": {
+            "type": "boolean"
+          },
+          "hist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParametrosArtigoSextoHistorico"
+            }
+          }
+        }
+      },
+      "ParametrosRetencaoMunicipal": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string"
+          },
+          "dtIni": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dtFim": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tpRet": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "enum": [
+                0,
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          "serv": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParametrosRetencaoMunicipalServico"
+            }
+          },
+          "respTrib": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParametrosRetencaoMunicipalInscricao"
+            }
+          }
+        }
+      },
+      "ParametrosArtigoSextoHistorico": {
+        "type": "object",
+        "properties": {
+          "dtIni": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dtFim": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ParametrosRetencaoMunicipalServico": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string"
+          },
+          "hist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParametrosRetencaoMunicipalServicoHistorico"
+            }
+          }
+        }
+      },
+      "ParametrosRetencaoMunicipalInscricao": {
+        "type": "object",
+        "properties": {
+          "tpInsc": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          "insc": {
+            "type": "string"
+          },
+          "hist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParametrosRetencaoMunicipalInscricaoHistorico"
+            }
+          }
+        }
+      },
+      "ParametrosRetencaoMunicipalServicoHistorico": {
+        "type": "object",
+        "properties": {
+          "dtIni": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dtFim": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ParametrosRetencaoMunicipalInscricaoHistorico": {
+        "type": "object",
+        "properties": {
+          "dtIni": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dtFim": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ResultadoConsultaParametrosMunicipais": {
+        "type": "object",
+        "properties": {
+          "dataHoraProcessamento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipoAmbiente": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "versaoAplicativo": {
+            "type": "string"
+          },
+          "mensagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultadoConsultaRegimesEspeciais": {
+        "type": "object",
+        "properties": {
+          "dataHoraProcessamento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipoAmbiente": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "regimesEspeciais": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InfoRegimeEspecialHistorico"
+                }
+              }
+            }
+          },
+          "mensagem": {
+            "type": "string"
+          }
+        }
+      },
+      "InfoRegimeEspecialHistorico": {
+        "type": "object",
+        "properties": {
+          "sit": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "dtIni": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dtFim": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "motivo": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultadoConsultaAliquotas": {
+        "type": "object",
+        "properties": {
+          "dataHoraProcessamento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipoAmbiente": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "aliquotas": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ParametrosAliquotaHistorico"
+              }
+            }
+          },
+          "mensagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ParametrosAliquotaHistorico": {
+        "type": "object",
+        "properties": {
+          "aliq": {
+            "type": "number",
+            "format": "double"
+          },
+          "dtIni": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dtFim": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ResultadoConsultaConfiguracoesConvenio": {
+        "type": "object",
+        "properties": {
+          "dataHoraProcessamento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipoAmbiente": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "parametrosConvenio": {
+            "$ref": "#/components/schemas/ParametrosConfiguracaoConvenio"
+          },
+          "mensagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ParametrosConfiguracaoConvenio": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "aderenteAmbienteNacional": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0,
+              1,
+              -1
+            ]
+          },
+          "aderenteEmissorNacional": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0,
+              1,
+              -1
+            ]
+          },
+          "aderenteMAN": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0,
+              1,
+              -1
+            ]
+          },
+          "permiteAproveitametoDeCreditos": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BeneficioInscricao": {
+        "type": "object",
+        "properties": {
+          "tpoInsc": {
+            "format": "int32",
+            "enum": [ 0, 1, 2, 3 ],
+            "type": "integer"
+          },
+          "insc": { "type": "string" },
+          "dtIni": {
+            "format": "date-time",
+            "description": "",
+            "type": "string"
+          },
+          "dtFim": {
+            "format": "date-time",
+            "description": "",
+            "type": "string"
+          }
+        }
+      },
+      "ResultadoConsultaBeneficio": {
+        "type": "object",
+        "properties": {
+          "dataHoraProcessamento": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "tipoAmbiente": {
+            "format": "int32",
+            "enum": [ 1, 2 ],
+            "type": "integer"
+          },
+          "beneficio": { "$ref": "#/components/schemas/Beneficio" },
+          "mensagem": { "type": "string" }
+        }
+      },
+      "Beneficio": {
+        "type": "object",
+        "properties": {
+          "numBenef": { "type": "string" },
+          "desc": {
+            "description": "",
+            "type": "string"
+          },
+          "dtIni": {
+            "format": "date-time",
+            "description": "",
+            "type": "string"
+          },
+          "dtFim": {
+            "format": "date-time",
+            "description": "",
+            "type": "string"
+          },
+          "tpoBenef": {
+            "format": "int32",
+            "description": "",
+            "enum": [ 1, 2, 3, 4 ],
+            "type": "integer"
+          },
+          "tpoRedBC": {
+            "format": "int32",
+            "description": "",
+            "enum": [ 1, 2 ],
+            "type": "integer"
+          },
+          "redPerclBC": {
+            "format": "double",
+            "description": "",
+            "type": "number"
+          },
+          "aliqDiferenc": {
+            "format": "double",
+            "type": "number"
+          },
+          "restAoMun": { "type": "boolean" },
+          "serv": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BeneficioServico" }
+          },
+          "contrib": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BeneficioInscricao" }
+          }
+        }
+      },
+      "BeneficioServico": {
+        "type": "object",
+        "properties": {
+          "codigo": { "type": "string" },
+          "dtIni": {
+            "format": "date-time",
+            "description": "",
+            "type": "string"
+          },
+          "dtFim": {
+            "format": "date-time",
+            "description": "",
+            "type": "string"
+          }
+        }
+      },
+
+      "StatusProcessamentoDistribuicao": {
+        "enum": [
+          "REJEICAO",
+          "NENHUM_DOCUMENTO_LOCALIZADO",
+          "DOCUMENTOS_LOCALIZADOS"
+        ],
+        "type": "string"
+      },
+      "TipoDocumentoRequisicao": {
+        "enum": [
+          "DPS",
+          "PEDIDO_REGISTRO_EVENTO",
+          "NFSE",
+          "EVENTO"
+        ],
+        "type": "string"
+      },
+      "TipoEvento": {
+        "enum": [
+          "CANCELAMENTO",
+          "SOLICITACAO_CANCELAMENTO_ANALISE_FISCAL",
+          "CANCELAMENTO_POR_SUBSTITUICAO",
+          "CANCELAMENTO_DEFERIDO_ANALISE_FISCAL",
+          "CANCELAMENTO_INDEFERIDO_ANALISE_FISCAL",
+          "CONFIRMACAO_PRESTADOR",
+          "REJEICAO_PRESTADOR",
+          "CONFIRMACAO_TOMADOR",
+          "REJEICAO_TOMADOR",
+          "CONFIRMACAO_INTERMEDIARIO",
+          "REJEICAO_INTERMEDIARIO",
+          "CONFIRMACAO_TACITA",
+          "ANULACAO_REJEICAO",
+          "CANCELAMENTO_POR_OFICIO",
+          "BLOQUEIO_POR_OFICIO",
+          "DESBLOQUEIO_POR_OFICIO",
+          "INCLUSAO_NFSE_DAN",
+          "TRIBUTOS_NFSE_RECOLHIDOS"
+        ],
+        "type": "string"
+      },
+      "TipoAmbiente": {
+        "enum": [
+          "PRODUCAO",
+          "HOMOLOGACAO"
+        ],
+        "type": "string"
+      },
+      "DistribuicaoNSU": {
+        "type": "object",
+        "properties": {
+          "NSU": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "ChaveAcesso": {
+            "type": "string",
+            "nullable": true
+          },
+          "TipoDocumento": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TipoDocumentoRequisicao"
+              }
+            ]
+          },
+          "TipoEvento": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TipoEvento"
+              }
+            ],
+            "nullable": true
+          },
+          "ArquivoXml": {
+            "type": "string",
+            "nullable": true
+          },
+          "DataHoraRecebimento": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "DataHoraGeracao": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoteDistribuicaoNSUResponse": {
+        "type": "object",
+        "properties": {
+          "StatusProcessamento": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StatusProcessamentoDistribuicao"
+              }
+            ]
+          },
+          "LoteDFe": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DistribuicaoNSU"
+            },
+            "nullable": true
+          },
+          "Alertas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MensagemProcessamento"
+            },
+            "nullable": true
+          },
+          "Erros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MensagemProcessamento"
+            },
+            "nullable": true
+          },
+          "TipoAmbiente": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TipoAmbiente"
+              }
+            ]
+          },
+          "VersaoAplicativo": {
+            "type": "string",
+            "nullable": true
+          },
+          "DataHoraProcessamento": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BeneficioReducaoBaseCalculoDTO": {
+        "type": "object",
+        "properties": {
+          "codigoMunicipio": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "listaServicos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TipoCredito": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "TipoMotivoCredito": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "TipoInscricao": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "TipoSimNao": {
+        "enum": [
+          0,
+          1,
+          -1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CreditoConcedidoDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tipoCredito": {
+            "$ref": "#/components/schemas/TipoCredito"
+          },
+          "dataExpiracao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataCompetencia": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "motivoCredito": {
+            "$ref": "#/components/schemas/TipoMotivoCredito"
+          },
+          "codigoTributario": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoMunicipio": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nomeMunicipio": {
+            "type": "string",
+            "nullable": true
+          },
+          "ufMunicipio": {
+            "type": "string",
+            "nullable": true
+          },
+          "inscricaoContribuinte": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoInscricaoContribuinte": {
+            "$ref": "#/components/schemas/TipoInscricao"
+          },
+          "valorCredito": {
+            "type": "number",
+            "format": "double"
+          },
+          "saldoDisponivel": {
+            "type": "number",
+            "format": "double"
+          },
+          "numeroDocumento": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "passivelAtualizacao": {
+            "$ref": "#/components/schemas/TipoSimNao"
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataHoraRegistro": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataHoraAtualizacao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "indicadorRegistroAtivo": {
+            "$ref": "#/components/schemas/TipoSimNao"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NovaApuracaoModel": {
+        "type": "object",
+        "properties": {
+          "xmlApuracao": {
+            "type": "string",
+            "description": "XML descrevendo a Apuração enviada pelo contribuinte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RespostaApuracaoBase": {
+        "type": "object",
+        "properties": {
+          "dataHoraProcessamento": {
+            "type": "string",
+            "description": "Data e hora de processamento da requisição",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KeySizes": {
+        "type": "object",
+        "properties": {
+          "minSize": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "maxSize": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "skipSize": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AsymmetricAlgorithm": {
+        "type": "object",
+        "properties": {
+          "keySize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "legalKeySizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KeySizes"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "signatureAlgorithm": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "keyExchangeAlgorithm": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Oid": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "friendlyName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "X500DistinguishedName": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "oid": {
+            "$ref": "#/components/schemas/Oid"
+          },
+          "rawData": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AsnEncodedData": {
+        "type": "object",
+        "properties": {
+          "oid": {
+            "$ref": "#/components/schemas/Oid"
+          },
+          "rawData": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicKey": {
+        "type": "object",
+        "properties": {
+          "encodedKeyValue": {
+            "$ref": "#/components/schemas/AsnEncodedData"
+          },
+          "encodedParameters": {
+            "$ref": "#/components/schemas/AsnEncodedData"
+          },
+          "key": {
+            "$ref": "#/components/schemas/AsymmetricAlgorithm"
+          },
+          "oid": {
+            "$ref": "#/components/schemas/Oid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IntPtr": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "X509Certificate2": {
+        "type": "object",
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "extensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "friendlyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasPrivateKey": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "privateKey": {
+            "$ref": "#/components/schemas/AsymmetricAlgorithm"
+          },
+          "issuerName": {
+            "$ref": "#/components/schemas/X500DistinguishedName"
+          },
+          "notAfter": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "notBefore": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publicKey": {
+            "$ref": "#/components/schemas/PublicKey"
+          },
+          "rawData": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "signatureAlgorithm": {
+            "$ref": "#/components/schemas/Oid"
+          },
+          "subjectName": {
+            "$ref": "#/components/schemas/X500DistinguishedName"
+          },
+          "thumbprint": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "handle": {
+            "$ref": "#/components/schemas/IntPtr"
+          },
+          "issuer": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "subject": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "X509RevocationMode": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "X509RevocationFlag": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "X509VerificationFlags": {
+        "enum": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          2048,
+          4095
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "TimeSpan": {
+        "type": "object",
+        "properties": {
+          "ticks": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hours": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "milliseconds": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "minutes": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "seconds": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "totalDays": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "totalHours": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "totalMilliseconds": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "totalMinutes": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "totalSeconds": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "X509ChainPolicy": {
+        "type": "object",
+        "properties": {
+          "applicationPolicy": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "certificatePolicy": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "extraStore": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "revocationMode": {
+            "$ref": "#/components/schemas/X509RevocationMode"
+          },
+          "revocationFlag": {
+            "$ref": "#/components/schemas/X509RevocationFlag"
+          },
+          "verificationFlags": {
+            "$ref": "#/components/schemas/X509VerificationFlags"
+          },
+          "verificationTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "urlRetrievalTimeout": {
+            "$ref": "#/components/schemas/TimeSpan"
+          }
+        },
+        "additionalProperties": false
+      },
+      "X509ChainStatusFlags": {
+        "enum": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          2048,
+          4096,
+          8192,
+          16384,
+          32768,
+          65536,
+          131072,
+          262144,
+          524288,
+          1048576,
+          16777216,
+          33554432,
+          67108864,
+          134217728
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "X509ChainStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/X509ChainStatusFlags"
+          },
+          "statusInformation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SafeX509ChainHandle": {
+        "type": "object",
+        "properties": {
+          "isInvalid": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "isClosed": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "X509Chain": {
+        "type": "object",
+        "properties": {
+          "chainElements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "chainPolicy": {
+            "$ref": "#/components/schemas/X509ChainPolicy"
+          },
+          "chainStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/X509ChainStatus"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "chainContext": {
+            "$ref": "#/components/schemas/IntPtr"
+          },
+          "safeHandle": {
+            "$ref": "#/components/schemas/SafeX509ChainHandle"
+          }
+        },
+        "additionalProperties": false
+      },
+      "X509KeyUsageFlags": {
+        "enum": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          32768
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "X509BasicConstraintsExtension": {
+        "type": "object",
+        "properties": {
+          "certificateAuthority": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPathLengthConstraint": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "pathLengthConstraint": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "critical": {
+            "type": "boolean"
+          },
+          "oid": {
+            "$ref": "#/components/schemas/Oid"
+          },
+          "rawData": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertificadoDigital": {
+        "type": "object",
+        "properties": {
+          "x509Certificate2": {
+            "$ref": "#/components/schemas/X509Certificate2"
+          },
+          "x509Chain": {
+            "$ref": "#/components/schemas/X509Chain"
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "cpf": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "x509KeyUsageFlags": {
+            "$ref": "#/components/schemas/X509KeyUsageFlags"
+          },
+          "x509BasicConstraintsExtension": {
+            "$ref": "#/components/schemas/X509BasicConstraintsExtension"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TipoApuracao": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "TipoDebito": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DebitoApuradoDTO": {
+        "type": "object",
+        "properties": {
+          "idDebitoApurado": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idDeclaracao": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tipoDebito": {
+            "$ref": "#/components/schemas/TipoDebito"
+          },
+          "codigoIbgeMunicipioIncidencia": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nomeComUFMunicipioIncidencia": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoUFIncidencia": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dataCompetencia": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "codigoTributacaoNacional": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoComplementarMunicipal": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "codigoSecundarioTributoFormatado": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorBaseCalculo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorTributoDestacado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "percentualAliquota": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorPrincipalDeclarado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMultaDeclarado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorJurosDeclarado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "numeroProcesso": {
+            "type": "string",
+            "nullable": true
+          },
+          "numeroAutoInfracao": {
+            "type": "string",
+            "nullable": true
+          },
+          "numeroSociedadeUniprofissional": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          },
+          "chaveDocumento": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoReceitaPrincipal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoReceitaDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoReceitaMulta": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoReceitaJuros": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "indicadorRegistroAtivo": {
+            "$ref": "#/components/schemas/TipoSimNao"
+          },
+          "ehAvulso": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreditoUtilizadoDTO": {
+        "type": "object",
+        "properties": {
+          "codigoIbgeMunicipioConcedente": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "valorUtilizado": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReducaoBaseCalculoAplicadaDTO": {
+        "type": "object",
+        "properties": {
+          "codigoIbgeMunicipioConcedente": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoSecundarioTributo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoComplementarMunicipal": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "valorReducao": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DadosRecepcaoXmlApuracaoDTO": {
+        "type": "object",
+        "properties": {
+          "idApuracao": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dataHoraRecebimento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "versaoDocumento": {
+            "type": "string",
+            "nullable": true
+          },
+          "xmlRecebido": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeclaracaoDTO": {
+        "type": "object",
+        "properties": {
+          "certificadoDigital": {
+            "$ref": "#/components/schemas/CertificadoDigital"
+          },
+          "idApuracao": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tipoInscricaoContribuinte": {
+            "$ref": "#/components/schemas/TipoInscricao"
+          },
+          "inscricaoContribuinte": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeContribuinte": {
+            "type": "string",
+            "nullable": true
+          },
+          "codMunicipioContribuinte": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "dataPagamentoDesejada": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "tipoApuracao": {
+            "$ref": "#/components/schemas/TipoApuracao"
+          },
+          "dataHoraRecimentoApuracao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "indicadorTributoRecolhido": {
+            "$ref": "#/components/schemas/TipoSimNao"
+          },
+          "indicadorRegistroAtivo": {
+            "$ref": "#/components/schemas/TipoSimNao"
+          },
+          "listaDebitosApuracao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DebitoApuradoDTO"
+            },
+            "nullable": true
+          },
+          "listaCreditosUtilizadosApuracao": {
+            "Dan_Get": null,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreditoUtilizadoDTO"
+            },
+            "nullable": true
+          },
+          "listaReducoesBaseCalculoApuracao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReducaoBaseCalculoAplicadaDTO"
+            },
+            "nullable": true
+          },
+          "dadosRecepcaoApuracao": {
+            "$ref": "#/components/schemas/DadosRecepcaoXmlApuracaoDTO"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Enum": {
+        "type": "object",
+        "additionalProperties": false
+      }
+    }
+  }
+}

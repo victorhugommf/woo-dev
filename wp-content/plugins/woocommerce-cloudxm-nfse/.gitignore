@@ -1,0 +1,8 @@
+.DS_Store
+# ConPort runtime artifacts
+context_portal/
+latest.json
+
+# Add to plugins/woocommerce-cloudxm-nfse/.gitignore:
+/vendor/
+/composer.lock

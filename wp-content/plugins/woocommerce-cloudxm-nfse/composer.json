@@ -1,0 +1,37 @@
+{
+  "name": "cloudxm/woocommerce-cloudxm-nfse",
+  "description": "Professional CloudXM NFS-e Plugin for WooCommerce - Automated electronic invoice generation and management with governo.br compliance",
+  "version": "2.0.0",
+  "type": "wordpress-plugin",
+  "license": "Proprietary - All rights reserved to CloudXM",
+  "authors": [
+    {
+      "name": "CloudXM",
+      "email": "support@cloudxm.com.br",
+      "homepage": "https://cloudxm.com.br"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-openssl": "*",
+    "ext-simplexml": "*",
+    "yahnis-elsts/plugin-update-checker": "^5.6",
+    "robrichards/xmlseclibs": "^3.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "CloudXM\\Nfse\\": "src/"
+    }
+  },
+  "scripts": {
+    "phpcs": "phpcs --standard=WordPress --extensions=php src/ includes"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

@@ -1,0 +1,202 @@
+/*
+ * Frontend Styles for WooCommerce CloudXM NFS-e plugin
+ * Modern PSR-4 compatible asset management
+ */
+
+/* Checkout form enhancements */
+.wc-nfse-checkout-integration {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
+
+.wc-nfse-checkout-integration h4 {
+    margin-top: 0;
+    color: #495057;
+    font-size: 16px;
+}
+
+/* NFSe information display */
+.wc-nfse-order-info {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.wc-nfse-order-info .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.wc-nfse-order-info .nfse-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: #007cba;
+}
+
+.wc-nfse-order-info .nfse-status {
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.wc-nfse-order-info .nfse-status.issued {
+    background: #d4edda;
+    color: #155724;
+}
+
+.wc-nfse-order-info .nfse-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.wc-nfse-order-info .nfse-status.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Styles for thank you page */
+.wc-nfse-thankyou-info {
+    background: #f0f8ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.wc-nfse-thankyou-info h3 {
+    color: #2c5282;
+    margin: 0 0 15px 0;
+}
+
+.wc-nfse-thankyou-info p {
+    color: #4a5568;
+    margin: 10px 0;
+}
+
+.wc-nfse-thankyou-info .nfse-link {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #007cba;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.wc-nfse-thankyou-info .nfse-link:hover {
+    background: #005a87;
+    color: #fff;
+}
+
+/* Order details table enhancements */
+.wc-nfse-order-metabox {
+    margin: 15px 0;
+}
+
+.wc-nfse-order-metabox .postbox-header {
+    background: #fafafa;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.wc-nfse-order-metabox .inside {
+    padding: 15px;
+}
+
+.wc-nfse-order-metabox .nfse-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e1e1e1;
+}
+
+/* Loading states */
+.wc-nfse-loading {
+    position: relative;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.wc-nfse-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007cba;
+    border-radius: 50%;
+    animation: wc-nfse-spin 1s linear infinite;
+}
+
+@keyframes wc-nfse-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error states */
+.wc-nfse-error {
+    background: #fff5f5;
+    border: 1px solid #feb2b2;
+    color: #c53030;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+/* Success states */
+.wc-nfse-success {
+    background: #f0fff4;
+    border: 1px solid #9ae6b4;
+    color: #22543d;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    .wc-nfse-checkout-integration {
+        margin: 15px 0;
+        padding: 12px;
+    }
+
+    .wc-nfse-order-info .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wc-nfse-order-info .nfse-number {
+        margin-bottom: 8px;
+    }
+
+    .wc-nfse-thankyou-info {
+        padding: 15px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .wc-nfse-order-info {
+        border: 1px solid #000;
+        background: #fff !important;
+        page-break-inside: avoid;
+    }
+
+    .wc-nfse-order-info .nfse-status {
+        border: 1px solid #000;
+    }
+}
