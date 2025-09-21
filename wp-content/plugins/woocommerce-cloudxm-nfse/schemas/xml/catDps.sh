@@ -1,0 +1,1 @@
+cat dps_13.xml | gzip -c | base64

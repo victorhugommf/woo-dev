@@ -126,10 +126,24 @@ if (isset($_POST['generate_dps_xml']) && isset($_POST['order_id'])) {
             }
         }
 
+        // Get comprehensive XSD validation results
+        $xsd_validation = $xml_result['xsd_validation'] ?? array();
+
+        // Generate comprehensive validation report if XSD validation exists
+        $comprehensive_validation = array();
+        if (!empty($xsd_validation)) {
+            $xsd_validator = new \CloudXM\NFSe\Services\NfSeXsdValidator();
+            $comprehensive_validation = $xsd_validator->generateComprehensiveValidationReport(
+                $signed_xml ?: $xml_content,
+                ['dps']
+            );
+        }
+
         $emission_result = array(
             'xml_generated' => true,
             'xml_content' => $signed_xml ?: $xml_content,
-            'xml_validation' => $xml_result['validation'] ?? array(),
+            'xml_validation' => $xsd_validation,
+            'comprehensive_validation' => $comprehensive_validation,
             'signature_info' => $signature_info
         );
     } catch (Exception $e) {
@@ -165,6 +179,7 @@ $recent_orders = wc_get_orders(array(
     <div class="nav-tab-wrapper">
         <a href="#order-check" class="nav-tab nav-tab-active"><?php _e('Verificar Pedido', 'wc-nfse'); ?></a>
         <a href="#xml-generation" class="nav-tab"><?php _e('Gerar XML DPS', 'wc-nfse'); ?></a>
+        <a href="#xsd-validation" class="nav-tab"><?php _e('Validação XSD', 'wc-nfse'); ?></a>
         <a href="#manual-emission" class="nav-tab"><?php _e('Emitir Manualmente', 'wc-nfse'); ?></a>
         <a href="#bulk-actions" class="nav-tab"><?php _e('Ações em Lote', 'wc-nfse'); ?></a>
     </div>
@@ -292,7 +307,7 @@ $recent_orders = wc_get_orders(array(
                         <textarea id="dps_xml" class="large-text code" rows="20" readonly><?php echo esc_textarea($emission_result['xml_content']); ?></textarea>
                         <div class="xml-actions">
                             <button type="button" class="button copy-xml"><?php _e('Copiar XML', 'wc-nfse'); ?></button>
-                            <a href="data:text/xml;charset=utf-8,<?php echo urlencode($emission_result['xml_content']); ?>"
+                            <a href="data:text/xml;charset=utf-8,<?php echo rawurlencode($emission_result['xml_content']); ?>"
                                 download="dps_<?php echo isset($_POST['order_id']) ? intval($_POST['order_id']) : 'order'; ?>.xml"
                                 class="button button-secondary">
                                 <?php _e('Download XML', 'wc-nfse'); ?>
@@ -300,28 +315,190 @@ $recent_orders = wc_get_orders(array(
                         </div>
                     </div>
 
-                    <?php if (!empty($emission_result['xml_validation'])): ?>
+                    <?php if (!empty($emission_result['xml_validation']) || !empty($emission_result['comprehensive_validation'])): ?>
                         <div class="xml-validation-results">
-                            <h4><?php _e('Validação do XML:', 'wc-nfse'); ?></h4>
-                            <?php $validation = $emission_result['xml_validation']; ?>
+                            <h4><?php _e('Validação XSD do XML:', 'wc-nfse'); ?></h4>
+
+                            <?php
+                            $validation = $emission_result['xml_validation'];
+                            $comprehensive = $emission_result['comprehensive_validation'];
+                            ?>
+
+                            <!-- Basic Validation Status -->
                             <div class="validation-status status-<?php echo $validation['valid'] ? 'success' : 'error'; ?>">
                                 <?php if ($validation['valid']): ?>
-                                    ✅ <?php _e('XML válido!', 'wc-nfse'); ?>
+                                    ✅ <?php _e('XML válido contra schema XSD oficial!', 'wc-nfse'); ?>
                                 <?php else: ?>
-                                    ❌ <?php _e('XML inválido!', 'wc-nfse'); ?>
+                                    ❌ <?php _e('XML inválido contra schema XSD oficial!', 'wc-nfse'); ?>
                                 <?php endif; ?>
                             </div>
 
-                            <?php if (!empty($validation['errors'])): ?>
-                                <div class="validation-errors">
-                                    <h5><?php _e('Erros:', 'wc-nfse'); ?></h5>
-                                    <ul>
-                                        <?php foreach ($validation['errors'] as $error): ?>
-                                            <li><?php echo esc_html($error); ?></li>
-                                        <?php endforeach; ?>
-                                    </ul>
+                            <!-- Comprehensive Validation Summary -->
+                            <?php if (!empty($comprehensive['summary'])): ?>
+                                <div class="validation-summary">
+                                    <h5><?php _e('Resumo da Validação:', 'wc-nfse'); ?></h5>
+                                    <div class="summary-grid">
+                                        <div class="summary-item">
+                                            <span class="label"><?php _e('Conformidade:', 'wc-nfse'); ?></span>
+                                            <span class="value compliance-<?php echo $comprehensive['summary']['compliance_percentage'] >= 100 ? 'full' : 'partial'; ?>">
+                                                <?php echo $comprehensive['summary']['compliance_percentage']; ?>%
+                                            </span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="label"><?php _e('Schemas Testados:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo $comprehensive['summary']['schemas_tested']; ?></span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="label"><?php _e('Schemas Válidos:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo $comprehensive['summary']['schemas_valid']; ?></span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="label"><?php _e('Total de Erros:', 'wc-nfse'); ?></span>
+                                            <span class="value error-count"><?php echo $comprehensive['summary']['total_errors']; ?></span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="label"><?php _e('Total de Avisos:', 'wc-nfse'); ?></span>
+                                            <span class="value warning-count"><?php echo $comprehensive['summary']['total_warnings']; ?></span>
+                                        </div>
+                                    </div>
                                 </div>
                             <?php endif; ?>
+
+                            <!-- Schema Information -->
+                            <?php if (!empty($validation['schema_info'])): ?>
+                                <div class="schema-info">
+                                    <h5><?php _e('Informações do Schema:', 'wc-nfse'); ?></h5>
+                                    <div class="schema-details">
+                                        <div class="detail-row">
+                                            <span class="label"><?php _e('Schema:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo esc_html($validation['schema_info']['file']); ?></span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="label"><?php _e('Namespace:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo esc_html($validation['schema_info']['namespace']); ?></span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="label"><?php _e('Descrição:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo esc_html($validation['schema_info']['description']); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Performance Metrics -->
+                            <?php if (!empty($validation['performance'])): ?>
+                                <div class="validation-performance">
+                                    <h5><?php _e('Métricas de Performance:', 'wc-nfse'); ?></h5>
+                                    <div class="performance-grid">
+                                        <div class="performance-item">
+                                            <span class="label"><?php _e('Tempo Total:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo $validation['performance']['total_time']; ?>ms</span>
+                                        </div>
+                                        <div class="performance-item">
+                                            <span class="label"><?php _e('Validação XSD:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo $validation['performance']['schema_validation_time']; ?>ms</span>
+                                        </div>
+                                        <div class="performance-item">
+                                            <span class="label"><?php _e('Tamanho XML:', 'wc-nfse'); ?></span>
+                                            <span class="value"><?php echo number_format($validation['performance']['xml_size']); ?> bytes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Validation Errors -->
+                            <?php if (!empty($validation['errors'])): ?>
+                                <div class="validation-errors">
+                                    <h5><?php _e('Erros de Validação XSD:', 'wc-nfse'); ?></h5>
+                                    <div class="errors-list">
+                                        <?php foreach ($validation['errors'] as $error): ?>
+                                            <div class="error-item">
+                                                <span class="error-icon">❌</span>
+                                                <span class="error-message"><?php echo esc_html($error); ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Validation Warnings -->
+                            <?php if (!empty($validation['warnings'])): ?>
+                                <div class="validation-warnings">
+                                    <h5><?php _e('Avisos de Validação:', 'wc-nfse'); ?></h5>
+                                    <div class="warnings-list">
+                                        <?php foreach ($validation['warnings'] as $warning): ?>
+                                            <div class="warning-item">
+                                                <span class="warning-icon">⚠️</span>
+                                                <span class="warning-message"><?php echo esc_html($warning); ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Recommendations -->
+                            <?php if (!empty($comprehensive['recommendations'])): ?>
+                                <div class="validation-recommendations">
+                                    <h5><?php _e('Recomendações:', 'wc-nfse'); ?></h5>
+                                    <div class="recommendations-list">
+                                        <?php foreach ($comprehensive['recommendations'] as $recommendation): ?>
+                                            <div class="recommendation-item">
+                                                <span class="recommendation-icon">💡</span>
+                                                <span class="recommendation-message"><?php echo esc_html($recommendation); ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Structure Validation -->
+                            <?php if (!empty($comprehensive['structure_validation'])): ?>
+                                <div class="structure-validation">
+                                    <h5><?php _e('Validação de Estrutura XML:', 'wc-nfse'); ?></h5>
+                                    <?php $structure = $comprehensive['structure_validation']; ?>
+                                    <div class="structure-status status-<?php echo $structure['valid'] ? 'success' : 'error'; ?>">
+                                        <?php if ($structure['valid']): ?>
+                                            ✅ <?php _e('Estrutura XML válida', 'wc-nfse'); ?>
+                                        <?php else: ?>
+                                            ❌ <?php _e('Estrutura XML inválida', 'wc-nfse'); ?>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <?php if (!empty($structure['structure_info'])): ?>
+                                        <div class="structure-info">
+                                            <div class="detail-row">
+                                                <span class="label"><?php _e('Elemento Raiz:', 'wc-nfse'); ?></span>
+                                                <span class="value"><?php echo esc_html($structure['structure_info']['root_element']); ?></span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="label"><?php _e('Namespace:', 'wc-nfse'); ?></span>
+                                                <span class="value"><?php echo esc_html($structure['structure_info']['namespace']); ?></span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="label"><?php _e('Elementos:', 'wc-nfse'); ?></span>
+                                                <span class="value"><?php echo $structure['structure_info']['element_count']; ?></span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="label"><?php _e('Assinatura Digital:', 'wc-nfse'); ?></span>
+                                                <span class="value"><?php echo $structure['structure_info']['has_signature'] ? '✅ Presente' : '❌ Ausente'; ?></span>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Validation Actions -->
+                            <div class="validation-actions">
+                                <button type="button" class="button button-secondary toggle-validation-details">
+                                    <?php _e('Mostrar/Ocultar Detalhes Técnicos', 'wc-nfse'); ?>
+                                </button>
+                                <?php if (!empty($comprehensive)): ?>
+                                    <button type="button" class="button button-secondary download-validation-report"
+                                        data-report="<?php echo esc_attr(json_encode($comprehensive)); ?>">
+                                        <?php _e('Download Relatório de Validação', 'wc-nfse'); ?>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endif; ?>
 
@@ -343,6 +520,147 @@ $recent_orders = wc_get_orders(array(
                 <?php endif; ?>
             </div>
         <?php endif; ?>
+    </div>
+
+    <!-- XSD Validation Demonstration Tab -->
+    <div id="xsd-validation" class="tab-content" style="display: none;">
+        <h2><?php _e('Demonstração de Validação XSD', 'wc-nfse'); ?></h2>
+
+        <div class="notice notice-info">
+            <p><strong><?php _e('Validação XSD:', 'wc-nfse'); ?></strong></p>
+            <ul>
+                <li>📋 <?php _e('Cole um XML DPS para validar contra o schema oficial', 'wc-nfse'); ?></li>
+                <li>🔍 <?php _e('Veja relatórios detalhados de conformidade XSD', 'wc-nfse'); ?></li>
+                <li>⚡ <?php _e('Teste a validação em tempo real', 'wc-nfse'); ?></li>
+                <li>📊 <?php _e('Obtenha métricas de performance da validação', 'wc-nfse'); ?></li>
+            </ul>
+        </div>
+
+        <form method="post" id="xsd-validation-form">
+            <table class="form-table">
+                <tr>
+                    <th scope="row">
+                        <label for="xml_content"><?php _e('XML DPS para Validação', 'wc-nfse'); ?></label>
+                    </th>
+                    <td>
+                        <textarea id="xml_content" name="xml_content" class="large-text code" rows="15"
+                            placeholder="<?php _e('Cole aqui o XML DPS que deseja validar...', 'wc-nfse'); ?>"><?php echo isset($_POST['xml_content']) ? esc_textarea($_POST['xml_content']) : ''; ?></textarea>
+                        <p class="description">
+                            <?php _e('Cole o XML DPS completo que deseja validar contra o schema XSD oficial.', 'wc-nfse'); ?>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        <label for="validation_type"><?php _e('Tipo de Validação', 'wc-nfse'); ?></label>
+                    </th>
+                    <td>
+                        <select id="validation_type" name="validation_type">
+                            <option value="comprehensive" <?php selected(isset($_POST['validation_type']) ? $_POST['validation_type'] : '', 'comprehensive'); ?>>
+                                <?php _e('Validação Completa (Recomendado)', 'wc-nfse'); ?>
+                            </option>
+                            <option value="basic" <?php selected(isset($_POST['validation_type']) ? $_POST['validation_type'] : '', 'basic'); ?>>
+                                <?php _e('Validação Básica XSD', 'wc-nfse'); ?>
+                            </option>
+                            <option value="structure_only" <?php selected(isset($_POST['validation_type']) ? $_POST['validation_type'] : '', 'structure_only'); ?>>
+                                <?php _e('Apenas Estrutura XML', 'wc-nfse'); ?>
+                            </option>
+                        </select>
+                        <p class="description">
+                            <?php _e('Escolha o tipo de validação a ser executada.', 'wc-nfse'); ?>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <p class="submit">
+                <input type="submit" name="validate_xml_xsd" class="button button-primary"
+                    value="<?php _e('Validar XML', 'wc-nfse'); ?>">
+                <button type="button" class="button button-secondary" id="clear-xml">
+                    <?php _e('Limpar', 'wc-nfse'); ?>
+                </button>
+                <button type="button" class="button button-secondary" id="load-sample-xml">
+                    <?php _e('Carregar XML de Exemplo', 'wc-nfse'); ?>
+                </button>
+                <span class="spinner"></span>
+            </p>
+        </form>
+
+        <?php
+        // Handle XSD validation demonstration
+        if (isset($_POST['validate_xml_xsd']) && !empty($_POST['xml_content'])) {
+            $xml_to_validate = stripslashes($_POST['xml_content']);
+            $validation_type = sanitize_text_field($_POST['validation_type']);
+
+            try {
+                $xsd_validator = new \CloudXM\NFSe\Services\NfSeXsdValidator();
+                $validation_demo_result = array();
+
+                switch ($validation_type) {
+                    case 'comprehensive':
+                        $validation_demo_result = $xsd_validator->generateComprehensiveValidationReport($xml_to_validate, ['dps']);
+                        break;
+                    case 'basic':
+                        $validation_demo_result = $xsd_validator->validateDpsXml($xml_to_validate);
+                        break;
+                    case 'structure_only':
+                        $validation_demo_result = $xsd_validator->validateXmlStructure($xml_to_validate);
+                        break;
+                }
+
+                echo '<div class="xsd-validation-demo-results">';
+                echo '<h3>' . __('Resultado da Validação XSD:', 'wc-nfse') . '</h3>';
+
+                if ($validation_type === 'comprehensive') {
+                    // Display comprehensive validation results
+                    $comprehensive = $validation_demo_result;
+                    include 'xsd-validation-display.php'; // We'll create this partial
+                } else {
+                    // Display basic validation results
+                    $validation = $validation_demo_result;
+                    echo '<div class="validation-status status-' . ($validation['valid'] ? 'success' : 'error') . '">';
+                    if ($validation['valid']) {
+                        echo '✅ ' . __('XML válido!', 'wc-nfse');
+                    } else {
+                        echo '❌ ' . __('XML inválido!', 'wc-nfse');
+                    }
+                    echo '</div>';
+
+                    if (!empty($validation['errors'])) {
+                        echo '<div class="validation-errors">';
+                        echo '<h5>' . __('Erros:', 'wc-nfse') . '</h5>';
+                        echo '<div class="errors-list">';
+                        foreach ($validation['errors'] as $error) {
+                            echo '<div class="error-item">';
+                            echo '<span class="error-icon">❌</span>';
+                            echo '<span class="error-message">' . esc_html($error) . '</span>';
+                            echo '</div>';
+                        }
+                        echo '</div></div>';
+                    }
+
+                    if (!empty($validation['warnings'])) {
+                        echo '<div class="validation-warnings">';
+                        echo '<h5>' . __('Avisos:', 'wc-nfse') . '</h5>';
+                        echo '<div class="warnings-list">';
+                        foreach ($validation['warnings'] as $warning) {
+                            echo '<div class="warning-item">';
+                            echo '<span class="warning-icon">⚠️</span>';
+                            echo '<span class="warning-message">' . esc_html($warning) . '</span>';
+                            echo '</div>';
+                        }
+                        echo '</div></div>';
+                    }
+                }
+
+                echo '</div>';
+            } catch (Exception $e) {
+                echo '<div class="notice notice-error">';
+                echo '<p><strong>' . __('Erro na validação:', 'wc-nfse') . '</strong> ' . esc_html($e->getMessage()) . '</p>';
+                echo '</div>';
+            }
+        }
+        ?>
     </div>
 
     <!-- Manual Emission Tab -->
@@ -558,13 +876,18 @@ $recent_orders = wc_get_orders(array(
 
     .xml-validation-results {
         margin-top: 20px;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        padding: 20px;
     }
 
     .validation-status {
-        padding: 10px;
-        border-radius: 4px;
+        padding: 15px;
+        border-radius: 6px;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
+        font-size: 16px;
     }
 
     .validation-status.status-success {
@@ -579,15 +902,329 @@ $recent_orders = wc_get_orders(array(
         border: 1px solid #f5c6cb;
     }
 
-    .validation-errors ul {
+    /* Validation Summary */
+    .validation-summary {
+        margin-bottom: 20px;
         background: #f8f9fa;
         padding: 15px;
-        border-left: 4px solid #dc3545;
+        border-radius: 4px;
+        border-left: 4px solid #007cba;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
         margin-top: 10px;
     }
 
-    .validation-errors li {
-        margin-bottom: 5px;
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #fff;
+        border-radius: 4px;
+        border: 1px solid #e5e5e5;
+    }
+
+    .summary-item .label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .summary-item .value {
+        font-weight: bold;
+    }
+
+    .compliance-full {
+        color: #28a745;
+    }
+
+    .compliance-partial {
+        color: #ffc107;
+    }
+
+    .error-count {
+        color: #dc3545;
+    }
+
+    .warning-count {
+        color: #fd7e14;
+    }
+
+    /* Schema Information */
+    .schema-info {
+        margin-bottom: 20px;
+        background: #e9ecef;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
+    .schema-details .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .schema-details .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .schema-details .label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .schema-details .value {
+        color: #6c757d;
+        font-family: monospace;
+        font-size: 12px;
+    }
+
+    /* Performance Metrics */
+    .validation-performance {
+        margin-bottom: 20px;
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #ffc107;
+    }
+
+    .performance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .performance-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 10px;
+        background: #fff;
+        border-radius: 4px;
+        border: 1px solid #ffeaa7;
+    }
+
+    .performance-item .label {
+        font-size: 12px;
+        color: #856404;
+    }
+
+    .performance-item .value {
+        font-weight: bold;
+        color: #856404;
+        font-family: monospace;
+    }
+
+    /* Validation Errors */
+    .validation-errors {
+        margin-bottom: 20px;
+        background: #f8d7da;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #dc3545;
+    }
+
+    .errors-list {
+        margin-top: 10px;
+    }
+
+    .error-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f5c6cb;
+    }
+
+    .error-item:last-child {
+        border-bottom: none;
+    }
+
+    .error-icon {
+        flex-shrink: 0;
+        font-size: 14px;
+    }
+
+    .error-message {
+        color: #721c24;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    /* Validation Warnings */
+    .validation-warnings {
+        margin-bottom: 20px;
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #ffc107;
+    }
+
+    .warnings-list {
+        margin-top: 10px;
+    }
+
+    .warning-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #ffeaa7;
+    }
+
+    .warning-item:last-child {
+        border-bottom: none;
+    }
+
+    .warning-icon {
+        flex-shrink: 0;
+        font-size: 14px;
+    }
+
+    .warning-message {
+        color: #856404;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    /* Recommendations */
+    .validation-recommendations {
+        margin-bottom: 20px;
+        background: #d1ecf1;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #17a2b8;
+    }
+
+    .recommendations-list {
+        margin-top: 10px;
+    }
+
+    .recommendation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #bee5eb;
+    }
+
+    .recommendation-item:last-child {
+        border-bottom: none;
+    }
+
+    .recommendation-icon {
+        flex-shrink: 0;
+        font-size: 14px;
+    }
+
+    .recommendation-message {
+        color: #0c5460;
+        font-size: 13px;
+        line-height: 1.4;
+        font-weight: 500;
+    }
+
+    /* Structure Validation */
+    .structure-validation {
+        margin-bottom: 20px;
+        background: #e2e3e5;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #6c757d;
+    }
+
+    .structure-status {
+        padding: 10px;
+        border-radius: 4px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .structure-info {
+        margin-top: 10px;
+        background: #fff;
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    /* Validation Actions */
+    .validation-actions {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e5e5e5;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .validation-actions .button {
+        font-size: 12px;
+    }
+
+    /* XSD Validation Demo */
+    .xsd-validation-demo-results {
+        margin-top: 30px;
+        background: #fff;
+        border: 2px solid #007cba;
+        border-radius: 8px;
+        padding: 25px;
+    }
+
+    .xsd-validation-demo-results h3 {
+        margin-top: 0;
+        color: #007cba;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 10px;
+    }
+
+    #xml_content {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        background: #f8f9fa;
+        border: 1px solid #ced4da;
+    }
+
+    #xml_content:focus {
+        border-color: #007cba;
+        box-shadow: 0 0 0 0.2rem rgba(0, 124, 186, 0.25);
+    }
+
+    .validation-demo-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+
+        .summary-grid,
+        .performance-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-item,
+        .performance-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .validation-actions,
+        .validation-demo-actions {
+            flex-direction: column;
+        }
+
+        .xsd-validation-demo-results {
+            padding: 15px;
+        }
     }
 
     .emission-results {
@@ -659,6 +1296,119 @@ $recent_orders = wc_get_orders(array(
             setTimeout(function() {
                 $button.text(originalText);
             }, 2000);
+        });
+
+        // Toggle validation details
+        $('.toggle-validation-details').on('click', function() {
+            var $technicalSections = $('.validation-performance, .schema-info, .structure-validation');
+            var isVisible = $technicalSections.first().is(':visible');
+
+            if (isVisible) {
+                $technicalSections.slideUp();
+                $(this).text('<?php _e('Mostrar Detalhes Técnicos', 'wc-nfse'); ?>');
+            } else {
+                $technicalSections.slideDown();
+                $(this).text('<?php _e('Ocultar Detalhes Técnicos', 'wc-nfse'); ?>');
+            }
+        });
+
+        // Download validation report
+        $('.download-validation-report').on('click', function() {
+            var reportData = $(this).data('report');
+            if (reportData) {
+                var blob = new Blob([JSON.stringify(reportData, null, 2)], {
+                    type: 'application/json'
+                });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'validation-report-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        // Auto-hide technical details initially
+        $('.validation-performance, .schema-info, .structure-validation').hide();
+
+        // XSD Validation Demo functionality
+        $('#clear-xml').on('click', function() {
+            $('#xml_content').val('');
+        });
+
+        $('#load-sample-xml').on('click', function() {
+            var sampleXml = '<?php echo "<?xml"; ?> version="1.0" encoding="UTF-8"?>\n' +
+                '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.00">\n' +
+                '    <infDPS Id="DPS3550308212345678000195000010000000000000001">\n' +
+                '        <tpAmb>2</tpAmb>\n' +
+                '        <dhEmi>2025-01-09T10:30:00Z</dhEmi>\n' +
+                '        <tpEmi>1</tpEmi>\n' +
+                '        <nDPS>000000000000001</nDPS>\n' +
+                '        <cDPS>1</cDPS>\n' +
+                '        <serie>00001</serie>\n' +
+                '        <dCompet>2025-01-09</dCompet>\n' +
+                '        <emit>\n' +
+                '            <CNPJ>12345678000195</CNPJ>\n' +
+                '            <IM>123456</IM>\n' +
+                '            <xNome>Empresa Teste LTDA</xNome>\n' +
+                '            <enderNac>\n' +
+                '                <xLgr>Rua das Flores</xLgr>\n' +
+                '                <nro>123</nro>\n' +
+                '                <xBairro>Centro</xBairro>\n' +
+                '                <cMun>3550308</cMun>\n' +
+                '                <xMun>São Paulo</xMun>\n' +
+                '                <CEP>01234567</CEP>\n' +
+                '                <UF>SP</UF>\n' +
+                '            </enderNac>\n' +
+                '        </emit>\n' +
+                '        <toma>\n' +
+                '            <CPF>12345678901</CPF>\n' +
+                '            <xNome>João Silva</xNome>\n' +
+                '            <enderNac>\n' +
+                '                <xLgr>Avenida Paulista</xLgr>\n' +
+                '                <nro>1000</nro>\n' +
+                '                <xBairro>Bela Vista</xBairro>\n' +
+                '                <cMun>3550308</cMun>\n' +
+                '                <xMun>São Paulo</xMun>\n' +
+                '                <CEP>01310100</CEP>\n' +
+                '                <UF>SP</UF>\n' +
+                '            </enderNac>\n' +
+                '        </toma>\n' +
+                '        <serv>\n' +
+                '            <cTribNac>010101</cTribNac>\n' +
+                '            <xDescServ>Desenvolvimento de software</xDescServ>\n' +
+                '            <cLocIncid>3550308</cLocIncid>\n' +
+                '        </serv>\n' +
+                '        <valores>\n' +
+                '            <vServ>1000.00</vServ>\n' +
+                '            <vLiq>950.00</vLiq>\n' +
+                '            <grpISS>\n' +
+                '                <vBC>1000.00</vBC>\n' +
+                '                <pAliq>0.0500</pAliq>\n' +
+                '                <vISS>50.00</vISS>\n' +
+                '            </grpISS>\n' +
+                '        </valores>\n' +
+                '    </infDPS>\n' +
+                '</DPS>';
+
+            $('#xml_content').val(sampleXml);
+        });
+
+        // XSD validation form submission with loading state
+        $('#xsd-validation-form').on('submit', function() {
+            var $spinner = $(this).find('.spinner');
+            $spinner.addClass('is-active');
+
+            // Scroll to results area after a short delay
+            setTimeout(function() {
+                if ($('.xsd-validation-demo-results').length) {
+                    $('html, body').animate({
+                        scrollTop: $('.xsd-validation-demo-results').offset().top - 50
+                    }, 500);
+                }
+            }, 100);
         });
 
         // Form submission with loading states

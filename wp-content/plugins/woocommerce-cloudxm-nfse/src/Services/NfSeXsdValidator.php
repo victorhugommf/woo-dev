@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NFSe XSD Validator Service
  *
@@ -42,7 +43,7 @@ class NfSeXsdValidator
     /**
      * Plugin constants
      */
-    private const SCHEMAS_DIR = '/schemas/';
+    private const SCHEMAS_DIR = '/schemas/xsd/';
 
     /**
      * Constructor
@@ -207,7 +208,6 @@ class NfSeXsdValidator
                 'memory_usage' => memory_get_usage(true),
                 'memory_peak' => memory_get_peak_usage(true)
             ];
-
         } catch (Exception $e) {
             $validationResult['errors'][] = 'XSD Validation Exception: ' . $e->getMessage();
 
@@ -344,7 +344,6 @@ class NfSeXsdValidator
             }
 
             $structureResult['valid'] = true;
-
         } catch (Exception $e) {
             $structureResult['errors'][] = 'XML Structure Exception: ' . $e->getMessage();
         }
@@ -465,7 +464,6 @@ class NfSeXsdValidator
             }
 
             $fixes['fixed_xml'] = $fixedXml;
-
         } catch (Exception $e) {
             $fixes['error'] = 'Error during fix validation: ' . $e->getMessage();
         }
@@ -484,10 +482,10 @@ class NfSeXsdValidator
         $availability = $this->checkSchemasAvailability();
         $testResults['schema_availability'] = [
             'success' => true,
-            'available_schemas' => array_filter($availability, function($schema) {
+            'available_schemas' => array_filter($availability, function ($schema) {
                 return $schema['available'];
             }),
-            'missing_schemas' => array_filter($availability, function($schema) {
+            'missing_schemas' => array_filter($availability, function ($schema) {
                 return !$schema['available'];
             })
         ];

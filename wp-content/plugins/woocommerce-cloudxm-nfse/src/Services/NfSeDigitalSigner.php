@@ -60,7 +60,7 @@ class NfSeDigitalSigner
             $dom->loadXML($xmlContent);
 
             // Find the element to sign (InfDPS)
-            $infDps = $dom->getElementsByTagName('InfDPS')->item(0);
+            $infDps = $dom->getElementsByTagName('infDPS')->item(0);
             if (!$infDps) {
                 throw new Exception(__('Elemento InfDPS não encontrado no XML.', 'wc-nfse'));
             }
