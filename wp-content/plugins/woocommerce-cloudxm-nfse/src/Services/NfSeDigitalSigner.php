@@ -50,6 +50,10 @@ class NfSeDigitalSigner
     public function signXml(string $xmlContent, ?string $certificateId = null): string
     {
         try {
+            // Normalize XML before signing (best practice)
+            // Remove excessive whitespace between tags for consistent canonicalization
+            $normalizedXml = preg_replace('/>\s+</', '><', $xmlContent);
+
             // Load certificate data
             $certificateData = $this->certificateManager->loadCertificateData($certificateId);
 
@@ -57,7 +61,7 @@ class NfSeDigitalSigner
             $dom = new DOMDocument('1.0', 'UTF-8');
             $dom->formatOutput = true;
             $dom->preserveWhiteSpace = false;
-            $dom->loadXML($xmlContent);
+            $dom->loadXML($normalizedXml);
 
             // Find the element to sign (InfDPS)
             $infDps = $dom->getElementsByTagName('infDPS')->item(0);
@@ -75,7 +79,7 @@ class NfSeDigitalSigner
             $canonicalXml = $this->canonicalizeElement($infDps);
 
             // Calculate digest
-            $digest = base64_encode(hash('sha256', $canonicalXml, true));
+            $digest = base64_encode(hash('sha1', $canonicalXml, true));
 
             // Create signature
             $signature = $this->createSignature($dom, $id, $digest, $certificateData);
@@ -120,7 +124,7 @@ class NfSeDigitalSigner
 
         // SignatureMethod
         $signatureMethod = $dom->createElement('SignatureMethod');
-        $signatureMethod->setAttribute('Algorithm', 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256');
+        $signatureMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#rsa-sha1');
         $signedInfo->appendChild($signatureMethod);
 
         // Reference
@@ -142,7 +146,7 @@ class NfSeDigitalSigner
 
         // DigestMethod
         $digestMethod = $dom->createElement('DigestMethod');
-        $digestMethod->setAttribute('Algorithm', 'http://www.w3.org/2001/04/xmlenc#sha256');
+        $digestMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1');
         $reference->appendChild($digestMethod);
 
         // DigestValue
@@ -209,7 +213,7 @@ class NfSeDigitalSigner
         }
 
         $signature = '';
-        if (!openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA256)) {
+        if (!openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA1)) {
             openssl_free_key($privateKey);
             throw new Exception(__('Erro ao calcular assinatura digital.', 'wc-nfse'));
         }
@@ -224,8 +228,11 @@ class NfSeDigitalSigner
     public function verifySignature(string $signedXml): bool
     {
         try {
+            // Normalize XML before verification (consistent with signing process)
+            $normalizedXml = preg_replace('/>\s+</', '><', $signedXml);
+
             $dom = new DOMDocument();
-            $dom->loadXML($signedXml);
+            $dom->loadXML($normalizedXml);
 
             // Find signature
             $signatureNodes = $dom->getElementsByTagNameNS('http://www.w3.org/2000/09/xmldsig#', 'Signature');
@@ -273,7 +280,7 @@ class NfSeDigitalSigner
 
             // Verify digest
             $canonicalElement = $this->canonicalizeElement($referencedElement);
-            $calculatedDigest = base64_encode(hash('sha256', $canonicalElement, true));
+            $calculatedDigest = base64_encode(hash('sha1', $canonicalElement, true));
 
             $digestValueNodes = $reference->getElementsByTagName('DigestValue');
             if ($digestValueNodes->length === 0) {
@@ -312,7 +319,7 @@ class NfSeDigitalSigner
                 throw new Exception(__('Não foi possível extrair chave pública do certificado.', 'wc-nfse'));
             }
 
-            $verificationResult = openssl_verify($signedInfoCanonical, $signatureValue, $publicKey, OPENSSL_ALGO_SHA256);
+            $verificationResult = openssl_verify($signedInfoCanonical, $signatureValue, $publicKey, OPENSSL_ALGO_SHA1);
 
             if ($verificationResult === 1) {
                 $this->logger->info('Assinatura XML verificada com sucesso');
@@ -446,7 +453,7 @@ class NfSeDigitalSigner
      */
     public function createSignatureHash(string $xmlContent): string
     {
-        return hash('sha256', $xmlContent);
+        return hash('sha1', $xmlContent);
     }
 
     /**

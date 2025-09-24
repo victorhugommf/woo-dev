@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DPS xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.00">
-  <infDPS Id="DPS350010520716495100014500001000000000000032">
+  <infDPS Id="DPS350010520716495100014500001000000000000041">
     <tpAmb>2</tpAmb>
-    <dhEmi>2025-09-23T15:44:25-03:00</dhEmi>
+    <dhEmi>2025-09-23T23:28:57-03:00</dhEmi>
     <verAplic>1.0.0</verAplic>
     <serie>1</serie>
-    <nDPS>32</nDPS>
+    <nDPS>41</nDPS>
     <dCompet>2025-09-23</dCompet>
     <tpEmit>1</tpEmit>
     <cLocEmi>3500105</cLocEmi>
@@ -64,13 +64,13 @@
     <SignedInfo>
       <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
-      <Reference URI="#DPS350010520716495100014500001000000000000032">
+      <Reference URI="#DPS350010520716495100014500001000000000000041">
         <Transforms>
           <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
           <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
         </Transforms>
         <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-        <DigestValue>s7pkV8pAb7oYxNSSYkXXFqzStA8=</DigestValue>
+        <DigestValue>2FSQQ8eAvMhtvj9IQVymz7EkQAw=</DigestValue>
       </Reference>
     </SignedInfo>
     <SignatureValue>eMndd6IKLZvukYZJ5BzoEhV8CdDjSV+875ztHOQ/Kgg0y1N/mWC4G9qftwNLGlrqwKP80+63XiHb8liQEOwQcjE3E4M+Pw7vFK8M+RTnp4ti0cPZB9JOfngy/kh1xnI3gdV8kUgbDKTJ9nc1RjsBwOZY8a5FacEbuBrHMFJYIUAdL2IvLgLvWfnaQ93s1RVMFJxZOcIkYtaFJClULxPFzf1XScmIg+QOpvVJwRYrxh9uA1byZmw4CYAxPlov5mNY8bGIdr65so/47WfFU8zLUMS/kp1DcQr7TkwJdO4I7JB6R4Rrjjmm5uu087DuLcilJZLIGxKkO8hRQqb2vyTWLw==</SignatureValue>

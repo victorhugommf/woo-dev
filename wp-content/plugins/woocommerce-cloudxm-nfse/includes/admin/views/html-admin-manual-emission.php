@@ -312,6 +312,28 @@ $recent_orders = wc_get_orders(array(
                                 class="button button-secondary">
                                 <?php _e('Download XML', 'wc-nfse'); ?>
                             </a>
+                            <button type="button" class="button button-primary copy-compressed-xml"
+                                data-xml="<?php echo esc_attr($emission_result['xml_content']); ?>">
+                                <?php _e('Copiar XML Comprimido (Base64)', 'wc-nfse'); ?>
+                            </button>
+                        </div>
+
+                        <!-- Compressed XML Display -->
+                        <div class="compressed-xml-section" style="margin-top: 20px;">
+                            <h4><?php _e('XML Comprimido para Testes (gzip + base64):', 'wc-nfse'); ?></h4>
+                            <div class="compressed-xml-info">
+                                <p class="description">
+                                    <?php _e('Use esta string comprimida para testes no Postman ou outras ferramentas de API:', 'wc-nfse'); ?>
+                                </p>
+                            </div>
+                            <textarea id="compressed_xml" class="large-text code" rows="8" readonly
+                                placeholder="<?php _e('Clique em "Copiar XML Comprimido" para gerar...', 'wc-nfse'); ?>"></textarea>
+                            <div class="compressed-xml-actions">
+                                <button type="button" class="button copy-compressed-only" disabled>
+                                    <?php _e('Copiar String Comprimida', 'wc-nfse'); ?>
+                                </button>
+                                <span class="compression-stats" style="margin-left: 15px; color: #666;"></span>
+                            </div>
                         </div>
                     </div>
 
@@ -1296,6 +1318,95 @@ $recent_orders = wc_get_orders(array(
             setTimeout(function() {
                 $button.text(originalText);
             }, 2000);
+        });
+
+        // Copy compressed XML functionality
+        $('.copy-compressed-xml').on('click', function() {
+            var xmlContent = $(this).data('xml');
+            var $button = $(this);
+            var originalText = $button.text();
+
+            $button.text('<?php _e('Comprimindo...', 'wc-nfse'); ?>').prop('disabled', true);
+
+            // Compress XML using AJAX
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'compress_xml_for_testing',
+                    xml_content: xmlContent,
+                    nonce: '<?php echo wp_create_nonce('compress_xml_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        var compressedXml = response.data.compressed_xml;
+                        var stats = response.data.stats;
+
+                        // Update compressed XML textarea
+                        $('#compressed_xml').val(compressedXml);
+
+                        // Update stats
+                        $('.compression-stats').html(
+                            '<?php _e('Original:', 'wc-nfse'); ?> ' + stats.original_size + ' bytes | ' +
+                            '<?php _e('Comprimido:', 'wc-nfse'); ?> ' + stats.compressed_size + ' bytes | ' +
+                            '<?php _e('Redução:', 'wc-nfse'); ?> ' + stats.compression_ratio + '%'
+                        );
+
+                        // Enable copy button
+                        $('.copy-compressed-only').prop('disabled', false);
+
+                        // Auto-copy to clipboard
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(compressedXml).then(function() {
+                                $button.text('<?php _e('Copiado para Clipboard!', 'wc-nfse'); ?>');
+                            });
+                        } else {
+                            // Fallback for older browsers
+                            $('#compressed_xml').select();
+                            document.execCommand('copy');
+                            $button.text('<?php _e('Copiado!', 'wc-nfse'); ?>');
+                        }
+
+                        setTimeout(function() {
+                            $button.text(originalText).prop('disabled', false);
+                        }, 3000);
+
+                    } else {
+                        alert('<?php _e('Erro ao comprimir XML:', 'wc-nfse'); ?> ' + response.data);
+                        $button.text(originalText).prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    alert('<?php _e('Erro na requisição AJAX', 'wc-nfse'); ?>');
+                    $button.text(originalText).prop('disabled', false);
+                }
+            });
+        });
+
+        // Copy compressed XML only
+        $('.copy-compressed-only').on('click', function() {
+            var $textarea = $('#compressed_xml');
+            if ($textarea.val()) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText($textarea.val()).then(function() {
+                        var $button = $(this);
+                        var originalText = $button.text();
+                        $button.text('<?php _e('Copiado!', 'wc-nfse'); ?>');
+                        setTimeout(function() {
+                            $button.text(originalText);
+                        }, 2000);
+                    });
+                } else {
+                    $textarea.select();
+                    document.execCommand('copy');
+                    var $button = $(this);
+                    var originalText = $button.text();
+                    $button.text('<?php _e('Copiado!', 'wc-nfse'); ?>');
+                    setTimeout(function() {
+                        $button.text(originalText);
+                    }, 2000);
+                }
+            }
         });
 
         // Toggle validation details

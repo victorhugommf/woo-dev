@@ -204,6 +204,62 @@ if (defined('WP_DEBUG') && WP_DEBUG && class_exists('\\CloudXM\\NFSe\\Utilities\
     $logger->debug('NFSe PSR-4 autoloader loaded successfully');
 }
 
+// XML compression for testing
+add_action('wp_ajax_compress_xml_for_testing', function () {
+    try {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'compress_xml_nonce')) {
+            wp_send_json_error(__('Nonce inválido', 'wc-nfse'));
+            return;
+        }
+
+        // Check permissions
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error(__('Permissão insuficiente', 'wc-nfse'));
+            return;
+        }
+
+        $xml_content = wp_unslash($_POST['xml_content']);
+
+        if (empty($xml_content)) {
+            wp_send_json_error(__('Conteúdo XML não fornecido', 'wc-nfse'));
+            return;
+        }
+
+        // Basic XML validation for security
+        if (!preg_match('/^<\?xml\s+version\s*=\s*["\']1\.0["\']/', trim($xml_content))) {
+            wp_send_json_error(__('Conteúdo não é um XML válido', 'wc-nfse'));
+            return;
+        }
+
+        // Check for DPS structure
+        if (strpos($xml_content, '<DPS') === false || strpos($xml_content, '</DPS>') === false) {
+            wp_send_json_error(__('XML deve conter estrutura DPS válida', 'wc-nfse'));
+            return;
+        }
+
+        // Use ApiClient to compress XML
+        $api_client = new \CloudXM\NFSe\Api\ApiClient();
+        $compressed_xml = $api_client->compressAndEncodeXml($xml_content);
+
+        // Calculate stats
+        $original_size = strlen($xml_content);
+        $compressed_size = strlen($compressed_xml);
+        $compression_ratio = round((1 - $compressed_size / $original_size) * 100, 2);
+
+        wp_send_json_success(array(
+            'compressed_xml' => $compressed_xml,
+            'stats' => array(
+                'original_size' => number_format($original_size),
+                'compressed_size' => number_format($compressed_size),
+                'compression_ratio' => $compression_ratio
+            )
+        ));
+    } catch (Exception $e) {
+        wp_send_json_error($e->getMessage());
+    }
+});
+
 // ---- Plugin health checks ----
 add_action('wp_ajax_health_check_nfse', function () {
     try {

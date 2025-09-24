@@ -73,8 +73,8 @@ class ApiClient
     public function submitDps($signed_xml, $dps_data)
     {
         try {
-            // Compress and encode XML
-            $compressed_xml = $this->compressXml($signed_xml);
+            // Compress and encode XML using the new public method
+            $compressed_xml = $this->compressAndEncodeXml($signed_xml);
 
             // Prepare request payload
             $payload = array(
@@ -409,15 +409,22 @@ class ApiClient
     }
 
     /**
-     * Compress XML for transmission
+     * Compress and encode XML for transmission (gzip + base64)
+     * 
+     * @param string $xml XML content to compress
+     * @return string Base64 encoded compressed XML
+     * @throws \Exception If compression fails
      */
-    private function compressXml($xml)
+    public function compressAndEncodeXml($xml)
     {
-        // Remove unnecessary whitespace
-        $xml = preg_replace('/>\s+</', '><', $xml);
+        $original_size = strlen($xml);
+
+        // Preserve XML declaration and structure - only remove excessive whitespace
+        // Don't modify the XML structure, let gzip handle the compression
+        $xml_to_compress = $xml;
 
         // Compress with gzip
-        $compressed = gzencode($xml, 9);
+        $compressed = gzencode($xml_to_compress, 9);
 
         if ($compressed === false) {
             throw new \Exception(__('Erro na compressão do XML.', 'wc-nfse'));
@@ -431,20 +438,65 @@ class ApiClient
             throw new \Exception(__('XML muito grande após compressão.', 'wc-nfse'));
         }
 
-        $this->logger->debug('XML comprimido', array(
-            'original_size' => strlen($xml),
+        $this->logger->debug('XML comprimido e codificado', array(
+            'original_size' => $original_size,
             'compressed_size' => strlen($compressed),
             'encoded_size' => strlen($encoded),
-            'compression_ratio' => round((1 - strlen($compressed) / strlen($xml)) * 100, 2) . '%'
+            'compression_ratio' => round((1 - strlen($compressed) / $original_size) * 100, 2) . '%'
         ));
 
         return $encoded;
     }
 
     /**
-     * Decompress XML from API response
+     * Compress XML with gzip only (without base64 encoding)
+     * 
+     * @param string $xml XML content to compress
+     * @return string Gzip compressed XML
+     * @throws \Exception If compression fails
      */
-    public function decompressXml($encoded_xml)
+    public function compressXml($xml)
+    {
+        $original_size = strlen($xml);
+
+        // Preserve XML structure - let gzip handle the compression
+        $xml_to_compress = $xml;
+
+        // Compress with gzip
+        $compressed = gzencode($xml_to_compress, 9);
+
+        if ($compressed === false) {
+            throw new \Exception(__('Erro na compressão do XML.', 'wc-nfse'));
+        }
+
+        $this->logger->debug('XML comprimido', array(
+            'original_size' => $original_size,
+            'compressed_size' => strlen($compressed),
+            'compression_ratio' => round((1 - strlen($compressed) / $original_size) * 100, 2) . '%'
+        ));
+
+        return $compressed;
+    }
+
+    /**
+     * Encode data to base64
+     * 
+     * @param string $data Data to encode
+     * @return string Base64 encoded data
+     */
+    public function encodeBase64($data)
+    {
+        return base64_encode($data);
+    }
+
+    /**
+     * Decode and decompress XML from API response (base64 + gzip)
+     * 
+     * @param string $encoded_xml Base64 encoded compressed XML
+     * @return string Decompressed XML content
+     * @throws \Exception If decompression fails
+     */
+    public function decodeAndDecompressXml($encoded_xml)
     {
         try {
             // Decode from base64
@@ -461,11 +513,58 @@ class ApiClient
                 throw new \Exception(__('Erro na descompressão do XML.', 'wc-nfse'));
             }
 
+            $this->logger->debug('XML decodificado e descomprimido', array(
+                'encoded_size' => strlen($encoded_xml),
+                'compressed_size' => strlen($compressed),
+                'decompressed_size' => strlen($xml)
+            ));
+
             return $xml;
         } catch (\Exception $e) {
             $this->logger->error('Erro na descompressão do XML: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Decompress XML from gzip only
+     * 
+     * @param string $compressed_xml Gzip compressed XML
+     * @return string Decompressed XML content
+     * @throws \Exception If decompression fails
+     */
+    public function decompressXml($compressed_xml)
+    {
+        try {
+            $xml = gzdecode($compressed_xml);
+
+            if ($xml === false) {
+                throw new \Exception(__('Erro na descompressão do XML.', 'wc-nfse'));
+            }
+
+            return $xml;
+        } catch (\Exception $e) {
+            $this->logger->error('Erro na descompressão do XML: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Decode data from base64
+     * 
+     * @param string $encoded_data Base64 encoded data
+     * @return string Decoded data
+     * @throws \Exception If decoding fails
+     */
+    public function decodeBase64($encoded_data)
+    {
+        $decoded = base64_decode($encoded_data);
+
+        if ($decoded === false) {
+            throw new \Exception(__('Erro na decodificação base64.', 'wc-nfse'));
+        }
+
+        return $decoded;
     }
 
     /**

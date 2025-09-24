@@ -69,7 +69,8 @@ class NfSeEmissionService implements NfSeEmissionServiceInterface
             $dpsResult = $this->dpsGenerator->generateDpsXml($orderId);
 
             // Sign XML digitally
-            $signedXml = $this->digitalSigner->signXml($dpsResult['xml']);
+            $certificateId = $this->getActiveCertificateId();
+            $signedXml = $this->digitalSigner->signXml($dpsResult['xml'], $certificateId);
 
             //esse método não é da apiClient - olhar compressAndEncode() da classe NfSeCompressor
             // Compress XML for transmission
@@ -583,5 +584,34 @@ class NfSeEmissionService implements NfSeEmissionServiceInterface
         }
 
         return 'individual';
+    }
+
+    /**
+     * Get active certificate ID
+     */
+    private function getActiveCertificateId(): ?string
+    {
+        try {
+            $activeCertificate = $this->certificateManager->getActiveCertificate();
+
+            if (!$activeCertificate) {
+                $this->logger->warning('Nenhum certificado ativo encontrado para assinatura');
+                return null;
+            }
+
+            // Verify certificate is not expired
+            if (strtotime($activeCertificate->valid_to) < time()) {
+                $this->logger->error('Certificado ativo está expirado', [
+                    'certificate_id' => $activeCertificate->id,
+                    'valid_to' => $activeCertificate->valid_to
+                ]);
+                throw new Exception(__('Certificado ativo está expirado.', 'wc-nfse'));
+            }
+
+            return (string) $activeCertificate->id;
+        } catch (Exception $e) {
+            $this->logger->error('Erro ao obter certificado ativo: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

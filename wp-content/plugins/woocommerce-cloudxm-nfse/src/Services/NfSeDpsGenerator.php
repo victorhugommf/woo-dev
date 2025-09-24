@@ -77,8 +77,8 @@ class NfSeDpsGenerator
     private function generateDpsId(int $dpsNumber): string
     {
         $municipalityCode = $this->getMunicipalityCode(
-            $this->settings->getPrestadorAddress()['cidade'] ?? '',
-            $this->settings->getPrestadorAddress()['uf'] ?? ''
+            $this->settings->getPrestadorAddress()['cidade'] ?? 'Adamantina',
+            $this->settings->getPrestadorAddress()['uf'] ?? 'SP'
         );
 
         $documento = $this->settings->getPrestadorCnpj();
@@ -118,8 +118,8 @@ class NfSeDpsGenerator
         // Get municipality code for emission location
         $prestadorAddress = $this->settings->getPrestadorAddress();
         $municipalityCode = $this->getMunicipalityCode(
-            $prestadorAddress['cidade'] ?? '',
-            $prestadorAddress['uf'] ?? ''
+            $prestadorAddress['cidade'] ?? 'Adamantina',
+            $prestadorAddress['uf'] ?? 'SP'
         );
 
         return [
@@ -273,8 +273,8 @@ class NfSeDpsGenerator
         $discriminacao = $this->buildServiceDescription($order);
 
         $municipalityCode = $this->getMunicipalityCode(
-            $this->settings->getPrestadorAddress()['cidade'] ?? '',
-            $this->settings->getPrestadorAddress()['uf'] ?? ''
+            $this->settings->getPrestadorAddress()['cidade'] ?? 'Adamantina',
+            $this->settings->getPrestadorAddress()['uf'] ?? 'SP'
         );
 
         return [
@@ -386,14 +386,14 @@ class NfSeDpsGenerator
         }
 
         // Corporate name (optional in DPS)
-        if (!empty($data['razao_social'])) {
-            $prest->appendChild($dom->createElement('xNome', htmlspecialchars($data['razao_social'], ENT_XML1)));
-        }
+        // if (!empty($data['razao_social'])) {
+        //     $prest->appendChild($dom->createElement('xNome', htmlspecialchars($data['razao_social'], ENT_XML1)));
+        // }
 
         // Address using TCEndereco structure with endNac sub-element for XSD compliance
-        if (!empty($data['endereco'])) {
-            $this->addEndereco($dom, $prest, $data['endereco']);
-        }
+        // if (!empty($data['endereco'])) {
+        //     $this->addEndereco($dom, $prest, $data['endereco']);
+        // }
 
         // Phone (digits only)
         if (!empty($data['telefone'])) {
@@ -471,7 +471,7 @@ class NfSeDpsGenerator
         $locPrest->appendChild($dom->createElement('cLocPrestacao', $data['codigo_municipio']));
 
         // cPaisPrestacao - Código do país onde o serviço foi prestado
-        $locPrest->appendChild($dom->createElement('cPaisPrestacao', $data['codigo_pais']));
+        // $locPrest->appendChild($dom->createElement('cPaisPrestacao', $data['codigo_pais']));
 
         // cServ - Código do serviço prestado (required)
         $cServ = $dom->createElement('cServ');
@@ -906,8 +906,37 @@ class NfSeDpsGenerator
     //pensar em implementar aqui
     private function getMunicipalityCode(string $city, string $state): string
     {
-        // TODO: Implement proper municipality code lookup
-        return '3550308'; // Default to São Paulo
+        // Normaliza parâmetros
+        $city  = mb_strtolower(trim($city), 'UTF-8');
+        $state = strtoupper(trim($state));
+
+        // Endpoint da API IBGE para os municípios de um estado
+        $url = "https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$state}/municipios";
+
+        // Requisição
+        $response = wp_remote_get($url, [
+            'timeout' => 15,
+        ]);
+
+        if (is_wp_error($response)) {
+            return ''; // Retorna vazio se a requisição falhar
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $municipios = json_decode($body, true);
+
+        if (!is_array($municipios)) {
+            return '';
+        }
+
+        // Procura pelo município
+        foreach ($municipios as $municipio) {
+            if (mb_strtolower($municipio['nome'], 'UTF-8') === $city) {
+                return (string) $municipio['id']; // Código IBGE
+            }
+        }
+
+        return ''; // Retorna vazio se não encontrar
     }
 
 
