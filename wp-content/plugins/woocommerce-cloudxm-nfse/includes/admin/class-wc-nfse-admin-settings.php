@@ -9,7 +9,8 @@ if (!defined('ABSPATH')) {
  *
  * Admin settings handler using modern PSR-4 components
  */
-class WC_NFSe_Admin_Settings {
+class WC_NFSe_Admin_Settings
+{
 
     /**
      * Settings instance
@@ -18,59 +19,63 @@ class WC_NFSe_Admin_Settings {
 
     /**
      * Constructor
-      */
-     public function __construct() {
-         $this->settings = new \CloudXM\NFSe\Compatibility\SettingsCompatibility();
+     */
+    public function __construct()
+    {
+        $this->settings = new \CloudXM\NFSe\Compatibility\SettingsCompatibility();
 
-         add_action('admin_init', array($this, 'init_settings'));
-         add_action('wp_ajax_wc_nfse_save_settings', array($this, 'save_settings'));
+        add_action('admin_init', array($this, 'init_settings'));
+        add_action('wp_ajax_wc_nfse_save_settings', array($this, 'save_settings'));
 
-         // Debug: Log when class is instantiated
-         if (defined('WP_DEBUG') && WP_DEBUG) {
-             $logger = \CloudXM\NFSe\Utilities\Logger::getInstance();
-             $logger->debug('WC_NFSe_Admin_Settings instantiated and AJAX action registered');
-         }
-     }
+        // Debug: Log when class is instantiated
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $logger = \CloudXM\NFSe\Utilities\Logger::getInstance();
+            $logger->debug('WC_NFSe_Admin_Settings instantiated and AJAX action registered');
+        }
+    }
 
     /**
      * Initialize settings
      */
-    public function init_settings() {
+    public function init_settings()
+    {
         // Register settings sections and fields will be handled via AJAX
     }
 
     /**
      * Output settings page
      */
-    public function output() {
+    public function output()
+    {
         $settings = $this->settings->get_all();
         $states = $this->settings->get_brazilian_states();
         $tax_regimes = $this->settings->get_tax_regimes();
-        
+
         include WC_NFSE_PLUGIN_PATH . 'includes/admin/views/html-admin-settings.php';
     }
 
     /**
      * Save settings via AJAX
-      */
-     public function save_settings() {
-         // Debug: Log that save_settings was called
-         if (defined('WP_DEBUG') && WP_DEBUG) {
-             $logger = \CloudXM\NFSe\Utilities\Logger::getInstance();
-             $logger->debug('save_settings method called', [
-                 'post_data' => $_POST,
-                 'files' => $_FILES
-             ]);
-         }
+     */
+    public function save_settings()
+    {
+        // Debug: Log that save_settings was called
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $logger = \CloudXM\NFSe\Utilities\Logger::getInstance();
+            $logger->debug('save_settings method called', [
+                'post_data' => $_POST,
+                'files' => $_FILES
+            ]);
+        }
 
-         check_ajax_referer('wc_nfse_admin', 'nonce');
+        check_ajax_referer('wc_nfse_admin', 'nonce');
 
-         if (!current_user_can('manage_woocommerce')) {
-             wp_die(__('Você não tem permissão para realizar esta ação.', 'wc-nfse'));
-         }
+        if (!current_user_can('manage_woocommerce')) {
+            wp_die(__('Você não tem permissão para realizar esta ação.', 'wc-nfse'));
+        }
 
-         $settings_data = array();
-        
+        $settings_data = array();
+
         // General settings
         $settings_data['enabled'] = sanitize_text_field($_POST['enabled'] ?? 'no');
         $settings_data['environment'] = sanitize_text_field($_POST['environment'] ?? 'homologation');
@@ -165,7 +170,8 @@ class WC_NFSe_Admin_Settings {
     /**
      * Get settings fields configuration
      */
-    public function get_settings_fields() {
+    public function get_settings_fields()
+    {
         return array(
             'general' => array(
                 'title' => __('Configurações Gerais', 'wc-nfse'),
@@ -212,8 +218,8 @@ class WC_NFSe_Admin_Settings {
                     'prestador_inscricao_municipal' => array(
                         'title' => __('Inscrição Municipal', 'wc-nfse'),
                         'type' => 'text',
-                        'description' => __('Inscrição municipal do prestador.', 'wc-nfse'),
-                        'required' => true
+                        'description' => __('Inscrição municipal do prestador (opcional).', 'wc-nfse'),
+                        'required' => false
                     ),
                     'prestador_razao_social' => array(
                         'title' => __('Razão Social', 'wc-nfse'),
@@ -231,4 +237,3 @@ class WC_NFSe_Admin_Settings {
         );
     }
 }
-

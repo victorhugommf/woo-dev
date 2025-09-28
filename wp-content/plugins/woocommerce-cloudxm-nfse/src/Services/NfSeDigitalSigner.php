@@ -36,64 +36,80 @@ class NfSeDigitalSigner
     private $certificateManager;
 
     /**
+     * Compressor instance
+     */
+    private $compressor;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->logger = Logger::getInstance();
         $this->certificateManager = \CloudXM\NFSe\Bootstrap\Factories::nfSeCertificateManager();
+        $this->compressor = new NfSeCompressor();
     }
 
     /**
-     * Sign XML with digital certificate
+     * Sign XML with digital certificate following DPS → Signature → Send sequence
      */
     public function signXml(string $xmlContent, ?string $certificateId = null): string
     {
         try {
-            // Normalize XML before signing (best practice)
-            // Remove excessive whitespace between tags for consistent canonicalization
-            $normalizedXml = preg_replace('/>\s+</', '><', $xmlContent);
+            // 0) Entrada e pré-condições
+            // Verificar se XML tem namespace raiz correto e elemento infDPS com Id
+            if (strpos($xmlContent, 'xmlns="http://www.sped.fazenda.gov.br/nfse"') === false) {
+                throw new Exception(__('XML deve ter namespace raiz: xmlns="http://www.sped.fazenda.gov.br/nfse"', 'wc-nfse'));
+            }
 
             // Load certificate data
             $certificateData = $this->certificateManager->loadCertificateData($certificateId);
 
-            // Create DOM document
-            $dom = new DOMDocument('1.0', 'UTF-8');
-            $dom->formatOutput = true;
-            $dom->preserveWhiteSpace = false;
-            $dom->loadXML($normalizedXml);
+            // 1) Normalização + 2) Preparar DOM (otimizado)
+            // Usar cleanXmlToDom do NfSeCompressor para limpeza + DOM em uma operação
+            $dom = $this->compressor->cleanXmlToDom($xmlContent);
 
-            // Find the element to sign (InfDPS)
+            if (!$dom) {
+                // Fallback: criar DOM manualmente se cleanXmlToDom falhar
+                $dom = new DOMDocument('1.0', 'UTF-8');
+                $dom->formatOutput = false;
+                $dom->preserveWhiteSpace = false;
+                $dom->loadXML($xmlContent);
+            }
+
+            // Localizar <infDPS>, capturar Id
             $infDps = $dom->getElementsByTagName('infDPS')->item(0);
             if (!$infDps) {
-                throw new Exception(__('Elemento InfDPS não encontrado no XML.', 'wc-nfse'));
+                throw new Exception(__('Elemento infDPS não encontrado no XML.', 'wc-nfse'));
             }
 
-            // Get the Id attribute
             $id = $infDps->getAttribute('Id');
             if (empty($id)) {
-                throw new Exception(__('Atributo Id não encontrado no elemento InfDPS.', 'wc-nfse'));
+                throw new Exception(__('Atributo Id não encontrado no elemento infDPS.', 'wc-nfse'));
             }
 
-            // Canonicalize the element to sign
-            $canonicalXml = $this->canonicalizeElement($infDps);
+            // Marcar no DOM: setIdAttribute('Id', true)
+            $infDps->setIdAttribute('Id', true);
 
-            // Calculate digest
-            $digest = base64_encode(hash('sha1', $canonicalXml, true));
+            // 3) e 4) Montar a estrutura de assinatura com cálculo seguro do digest
+            // Passar o elemento infDPS para cálculo interno do digest (maior segurança)
+            $signature = $this->createEnvelopedSignature($dom, $id, $infDps, $certificateData);
 
-            // Create signature
-            $signature = $this->createSignature($dom, $id, $digest, $certificateData);
-
-            // Add signature to DPS
+            // 7) Montar <Signature> e anexar
+            // Anexar <Signature> como filho de <DPS> (enveloped)
             $dpsElement = $dom->getElementsByTagName('DPS')->item(0);
+            if (!$dpsElement) {
+                throw new Exception(__('Elemento DPS não encontrado no XML.', 'wc-nfse'));
+            }
             $dpsElement->appendChild($signature);
 
+            // 8) Saída assinada → não tocar no XML depois (sem pretty print, sem re-serialização)
             $signedXml = $dom->saveXML();
 
-            $this->logger->info('XML assinado digitalmente com sucesso', [
+            $this->logger->info('XML assinado digitalmente seguindo sequência DPS → Assinatura → Envio', [
                 'certificate_id' => $certificateId,
                 'element_id' => $id,
-                'digest_length' => strlen($digest)
+                'signed_xml_size' => strlen($signedXml)
             ]);
 
             return $signedXml;
@@ -106,87 +122,123 @@ class NfSeDigitalSigner
     }
 
     /**
-     * Create XML signature
+     * Create XMLDSig Enveloped signature following v1.00 algorithms
+     * All elements must be in XMLDSig namespace
+     * Calculates digest internally for enhanced security
      */
-    private function createSignature(DOMDocument $dom, string $referenceId, string $digest, array $certificateData): \DOMElement
+    private function createEnvelopedSignature(DOMDocument $dom, string $referenceId, \DOMElement $infDpsElement, array $certificateData): \DOMElement
     {
-        // Create Signature element
-        $signature = $dom->createElementNS('http://www.w3.org/2000/09/xmldsig#', 'Signature');
+        $xmldsigNS = 'http://www.w3.org/2000/09/xmldsig#';
 
-        // Create SignedInfo
-        $signedInfo = $dom->createElement('SignedInfo');
+        // 4) Canonicalizar o alvo e calcular digest (segurança interna)
+        // Alvo: elemento <infDPS> após aplicar o transform enveloped
+        $canonicalInfDps = $infDpsElement->C14N(false, false); // C14N 20010315 (inclusive), sem comentários
+
+        // Calcular DigestValue = base64( SHA1( C14N(infDPS) ) )
+        $digestValue = base64_encode(hash('sha1', $canonicalInfDps, true));
+
+        // Log do digest calculado internamente (segurança aprimorada)
+        $this->logger->debug('Digest calculado internamente no createEnvelopedSignature', [
+            'digest_length' => strlen($digestValue),
+            'canonical_size' => strlen($canonicalInfDps),
+            'reference_id' => $referenceId
+        ]);
+
+        // 3) Montar a estrutura de assinatura
+        // Tipo: XMLDSig Enveloped (a assinatura dentro do documento)
+        $signature = $dom->createElementNS($xmldsigNS, 'Signature');
+
+        // 5) Montar <SignedInfo> - TODOS os elementos no namespace XMLDSig
+        $signedInfo = $dom->createElementNS($xmldsigNS, 'SignedInfo');
         $signature->appendChild($signedInfo);
 
-        // CanonicalizationMethod
-        $canonicalizationMethod = $dom->createElement('CanonicalizationMethod');
+        // CanonicalizationMethod = C14N 20010315 (inclusive)
+        $canonicalizationMethod = $dom->createElementNS($xmldsigNS, 'CanonicalizationMethod');
         $canonicalizationMethod->setAttribute('Algorithm', 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315');
         $signedInfo->appendChild($canonicalizationMethod);
 
-        // SignatureMethod
-        $signatureMethod = $dom->createElement('SignatureMethod');
+        // SignatureMethod = RSA-SHA1
+        $signatureMethod = $dom->createElementNS($xmldsigNS, 'SignatureMethod');
         $signatureMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#rsa-sha1');
         $signedInfo->appendChild($signatureMethod);
 
-        // Reference
-        $reference = $dom->createElement('Reference');
+        // Uma Reference: URI="#<Id de infDPS>"
+        $reference = $dom->createElementNS($xmldsigNS, 'Reference');
         $reference->setAttribute('URI', '#' . $referenceId);
         $signedInfo->appendChild($reference);
 
-        // Transforms
-        $transforms = $dom->createElement('Transforms');
+        // Transforms da Reference (sobre o <infDPS>)
+        $transforms = $dom->createElementNS($xmldsigNS, 'Transforms');
         $reference->appendChild($transforms);
 
-        $transform = $dom->createElement('Transform');
-        $transform->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#enveloped-signature');
-        $transforms->appendChild($transform);
+        // Transform 1: http://www.w3.org/2000/09/xmldsig#enveloped-signature
+        $transform1 = $dom->createElementNS($xmldsigNS, 'Transform');
+        $transform1->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#enveloped-signature');
+        $transforms->appendChild($transform1);
 
-        $transform2 = $dom->createElement('Transform');
+        // Transform 2: C14N 20010315 também como transform (para manter coerência)
+        $transform2 = $dom->createElementNS($xmldsigNS, 'Transform');
         $transform2->setAttribute('Algorithm', 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315');
         $transforms->appendChild($transform2);
 
-        // DigestMethod
-        $digestMethod = $dom->createElement('DigestMethod');
+        // DigestMethod = SHA1
+        $digestMethod = $dom->createElementNS($xmldsigNS, 'DigestMethod');
         $digestMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1');
         $reference->appendChild($digestMethod);
 
-        // DigestValue
-        $digestValue = $dom->createElement('DigestValue', $digest);
-        $reference->appendChild($digestValue);
+        // DigestValue calculado em (4)
+        $digestValueElement = $dom->createElementNS($xmldsigNS, 'DigestValue', $digestValue);
+        $reference->appendChild($digestValueElement);
 
-        // Calculate SignedInfo digest and signature
-        $signedInfoCanonical = $this->canonicalizeElement($signedInfo);
-        $signatureValue = $this->calculateSignatureValue($signedInfoCanonical, $certificateData['private_key']);
+        // 6) Assinar o <SignedInfo>
+        // Canonicalizar o <SignedInfo> com C14N 20010315 (inclusive)
+        $signedInfoCanonical = $signedInfo->C14N(false, false);
 
-        // SignatureValue
-        $signatureValueElement = $dom->createElement('SignatureValue', $signatureValue);
+        // Assinar com RSA-SHA1 usando a chave privada do A1
+        $signatureValue = $this->calculateRsaSha1Signature($signedInfoCanonical, $certificateData['private_key']);
+
+        // SignatureValue = base64( RSA_SHA1( C14N(SignedInfo) ) )
+        $signatureValueElement = $dom->createElementNS($xmldsigNS, 'SignatureValue', $signatureValue);
         $signature->appendChild($signatureValueElement);
 
-        // KeyInfo
-        $keyInfo = $this->createKeyInfo($dom, $certificateData['certificate']);
+        // 7) KeyInfo com apenas o certificado do titular (sem cadeia)
+        $keyInfo = $this->createKeyInfoWithSingleCertificate($dom, $certificateData['certificate']);
         $signature->appendChild($keyInfo);
 
         return $signature;
     }
 
     /**
-     * Create KeyInfo element
+     * Create KeyInfo element with single certificate (without chain)
+     * All elements in XMLDSig namespace
      */
-    private function createKeyInfo(DOMDocument $dom, string $certificatePem): \DOMElement
+    private function createKeyInfoWithSingleCertificate(DOMDocument $dom, string $certificatePem): \DOMElement
     {
-        $keyInfo = $dom->createElement('KeyInfo');
+        $xmldsigNS = 'http://www.w3.org/2000/09/xmldsig#';
+
+        $keyInfo = $dom->createElementNS($xmldsigNS, 'KeyInfo');
 
         // X509Data
-        $x509Data = $dom->createElement('X509Data');
+        $x509Data = $dom->createElementNS($xmldsigNS, 'X509Data');
         $keyInfo->appendChild($x509Data);
 
-        // X509Certificate (without headers and line breaks)
+        // X509Certificate - apenas o certificado do titular (sem cadeia)
+        // Remove headers and line breaks
         $certificateContent = preg_replace('/-----[^-]+-----/', '', $certificatePem);
         $certificateContent = preg_replace('/\s+/', '', $certificateContent);
 
-        $x509Certificate = $dom->createElement('X509Certificate', $certificateContent);
+        $x509Certificate = $dom->createElementNS($xmldsigNS, 'X509Certificate', $certificateContent);
         $x509Data->appendChild($x509Certificate);
 
         return $keyInfo;
+    }
+
+    /**
+     * Create KeyInfo element (legacy method for compatibility)
+     */
+    private function createKeyInfo(DOMDocument $dom, string $certificatePem): \DOMElement
+    {
+        return $this->createKeyInfoWithSingleCertificate($dom, $certificatePem);
     }
 
     /**
@@ -202,9 +254,9 @@ class NfSeDigitalSigner
     }
 
     /**
-     * Calculate signature value
+     * Calculate RSA-SHA1 signature value
      */
-    private function calculateSignatureValue(string $data, string $privateKeyPem): string
+    private function calculateRsaSha1Signature(string $data, string $privateKeyPem): string
     {
         $privateKey = openssl_pkey_get_private($privateKeyPem);
 
@@ -214,10 +266,8 @@ class NfSeDigitalSigner
 
         $signature = '';
         if (!openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA1)) {
-            openssl_free_key($privateKey);
-            throw new Exception(__('Erro ao calcular assinatura digital.', 'wc-nfse'));
+            throw new Exception(__('Erro ao calcular assinatura RSA-SHA1.', 'wc-nfse'));
         }
-
 
         return base64_encode($signature);
     }
@@ -463,5 +513,55 @@ class NfSeDigitalSigner
     {
         $calculatedHash = $this->createSignatureHash($xmlContent);
         return hash_equals($expectedHash, $calculatedHash);
+    }
+
+    /**
+     * Prepare signed XML for sending (step 8: compression and base64 encoding)
+     * Uses the existing NfSeCompressor service
+     * 
+     * @param string $signedXml The signed XML content
+     * @return string Base64 encoded gzipped XML for dpsXmlGZipB64 field
+     */
+    public function prepareXmlForSending(string $signedXml): string
+    {
+        try {
+            // 8) Saída assinada → compactação e envio
+            // Usar o serviço NfSeCompressor existente
+            $dpsXmlGZipB64 = $this->compressor->compressAndEncode($signedXml);
+
+            $this->logger->info('XML preparado para envio usando NfSeCompressor', [
+                'original_size' => strlen($signedXml),
+                'encoded_size' => strlen($dpsXmlGZipB64)
+            ]);
+
+            return $dpsXmlGZipB64;
+        } catch (Exception $e) {
+            $this->logger->error('Erro ao preparar XML para envio: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Sign and prepare XML for sending in one step
+     * 
+     * @param string $xmlContent Original XML content
+     * @param string|null $certificateId Certificate ID to use
+     * @return array Array with 'signedXml' and 'dpsXmlGZipB64' keys
+     */
+    public function signAndPrepareForSending(string $xmlContent, ?string $certificateId = null): array
+    {
+        try {
+            // Sequência completa: DPS → Assinatura → Envio
+            $signedXml = $this->signXml($xmlContent, $certificateId);
+            $dpsXmlGZipB64 = $this->prepareXmlForSending($signedXml);
+
+            return [
+                'signedXml' => $signedXml,
+                'dpsXmlGZipB64' => $dpsXmlGZipB64
+            ];
+        } catch (Exception $e) {
+            $this->logger->error('Erro na sequência completa de assinatura e preparação: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

@@ -111,10 +111,15 @@ if (isset($_POST['generate_dps_xml']) && isset($_POST['order_id'])) {
                 $digital_signer = new \CloudXM\NFSe\Services\NfSeDigitalSigner();
                 $signed_xml = $digital_signer->signXml($xml_content);
 
+                // Compress signed XML for frontend use
+                $compressor = \CloudXM\NFSe\Bootstrap\Factories::nfSeCompressor();
+                $dps_xml_gzip_b64 = $compressor->compressAndEncode($signed_xml);
+
                 $signature_info = array(
                     'signed' => true,
                     'signature_timestamp' => $digital_signer->getSignatureTimestamp($signed_xml),
-                    'certificate_info' => $digital_signer->extractCertificateInfo($signed_xml)
+                    'certificate_info' => $digital_signer->extractCertificateInfo($signed_xml),
+                    'dps_xml_gzip_b64' => $dps_xml_gzip_b64
                 );
             } catch (Exception $sign_e) {
                 // If signing fails, keep the unsigned XML but log the error
@@ -154,6 +159,16 @@ if (isset($_POST['generate_dps_xml']) && isset($_POST['order_id'])) {
     }
 }
 
+// Detect active tab from form submission
+$active_tab = '#order-check'; // Default tab
+if (isset($_POST['active_tab']) && !empty($_POST['active_tab'])) {
+    $active_tab = sanitize_text_field($_POST['active_tab']);
+} elseif (isset($_POST['generate_dps_xml'])) {
+    $active_tab = '#xml-generation';
+} elseif (isset($_POST['emit_nfse_manually'])) {
+    $active_tab = '#manual-emission';
+}
+
 // Get recent orders for quick selection
 $recent_orders = wc_get_orders(array(
     'limit' => 20,
@@ -177,15 +192,15 @@ $recent_orders = wc_get_orders(array(
     </div>
 
     <div class="nav-tab-wrapper">
-        <a href="#order-check" class="nav-tab nav-tab-active"><?php _e('Verificar Pedido', 'wc-nfse'); ?></a>
-        <a href="#xml-generation" class="nav-tab"><?php _e('Gerar XML DPS', 'wc-nfse'); ?></a>
-        <a href="#xsd-validation" class="nav-tab"><?php _e('Validação XSD', 'wc-nfse'); ?></a>
-        <a href="#manual-emission" class="nav-tab"><?php _e('Emitir Manualmente', 'wc-nfse'); ?></a>
-        <a href="#bulk-actions" class="nav-tab"><?php _e('Ações em Lote', 'wc-nfse'); ?></a>
+        <a href="#order-check" class="nav-tab <?php echo $active_tab === '#order-check' ? 'nav-tab-active' : ''; ?>"><?php _e('Verificar Pedido', 'wc-nfse'); ?></a>
+        <a href="#xml-generation" class="nav-tab <?php echo $active_tab === '#xml-generation' ? 'nav-tab-active' : ''; ?>"><?php _e('Gerar XML DPS', 'wc-nfse'); ?></a>
+        <a href="#xsd-validation" class="nav-tab <?php echo $active_tab === '#xsd-validation' ? 'nav-tab-active' : ''; ?>"><?php _e('Validação XSD', 'wc-nfse'); ?></a>
+        <a href="#manual-emission" class="nav-tab <?php echo $active_tab === '#manual-emission' ? 'nav-tab-active' : ''; ?>"><?php _e('Emitir Manualmente', 'wc-nfse'); ?></a>
+        <a href="#bulk-actions" class="nav-tab <?php echo $active_tab === '#bulk-actions' ? 'nav-tab-active' : ''; ?>"><?php _e('Ações em Lote', 'wc-nfse'); ?></a>
     </div>
 
     <!-- Order Status Check Tab -->
-    <div id="order-check" class="tab-content">
+    <div id="order-check" class="tab-content" <?php echo $active_tab !== '#order-check' ? 'style="display: none;"' : ''; ?>>
         <h2><?php _e('Verificar Status de Emissão', 'wc-nfse'); ?></h2>
 
         <form method="post">
@@ -275,10 +290,11 @@ $recent_orders = wc_get_orders(array(
     </div>
 
     <!-- XML Generation Tab -->
-    <div id="xml-generation" class="tab-content" style="display: none;">
+    <div id="xml-generation" class="tab-content" <?php echo $active_tab !== '#xml-generation' ? 'style="display: none;"' : ''; ?>>
         <h2><?php _e('Gerar XML DPS', 'wc-nfse'); ?></h2>
 
         <form method="post">
+            <input type="hidden" name="active_tab" value="#xml-generation">
             <table class="form-table">
                 <tr>
                     <th scope="row">
@@ -316,24 +332,6 @@ $recent_orders = wc_get_orders(array(
                                 data-xml="<?php echo esc_attr($emission_result['xml_content']); ?>">
                                 <?php _e('Copiar XML Comprimido (Base64)', 'wc-nfse'); ?>
                             </button>
-                        </div>
-
-                        <!-- Compressed XML Display -->
-                        <div class="compressed-xml-section" style="margin-top: 20px;">
-                            <h4><?php _e('XML Comprimido para Testes (gzip + base64):', 'wc-nfse'); ?></h4>
-                            <div class="compressed-xml-info">
-                                <p class="description">
-                                    <?php _e('Use esta string comprimida para testes no Postman ou outras ferramentas de API:', 'wc-nfse'); ?>
-                                </p>
-                            </div>
-                            <textarea id="compressed_xml" class="large-text code" rows="8" readonly
-                                placeholder="<?php _e('Clique em "Copiar XML Comprimido" para gerar...', 'wc-nfse'); ?>"></textarea>
-                            <div class="compressed-xml-actions">
-                                <button type="button" class="button copy-compressed-only" disabled>
-                                    <?php _e('Copiar String Comprimida', 'wc-nfse'); ?>
-                                </button>
-                                <span class="compression-stats" style="margin-left: 15px; color: #666;"></span>
-                            </div>
                         </div>
                     </div>
 
@@ -529,6 +527,23 @@ $recent_orders = wc_get_orders(array(
                             <?php $signature = $emission_result['signature_info']; ?>
                             <?php if ($signature['signed']): ?>
                                 <p class="signature-success">✅ <?php _e('XML assinado digitalmente com sucesso!', 'wc-nfse'); ?></p>
+
+                                <?php if (!empty($signature['dps_xml_gzip_b64'])): ?>
+                                    <div class="signature-compressed-data" style="margin-top: 15px;">
+                                        <h4><?php _e('XML Comprimido para Envio (dpsXmlGZipB64)', 'wc-nfse'); ?></h4>
+                                        <div style="background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                            <p><strong><?php _e('Tamanho:', 'wc-nfse'); ?></strong> <?php echo strlen($signature['dps_xml_gzip_b64']); ?> bytes</p>
+                                            <p><strong><?php _e('Formato:', 'wc-nfse'); ?></strong> Base64(GZip(XML))</p>
+                                            <textarea readonly class="large-text code" rows="4" style="font-family: monospace; font-size: 11px;"><?php echo esc_textarea($signature['dps_xml_gzip_b64']); ?></textarea>
+                                            <p class="description">
+                                                <?php _e('Este é o XML assinado e comprimido, pronto para ser enviado via API. Use este valor no campo dpsXmlGZipB64 das requisições.', 'wc-nfse'); ?>
+                                            </p>
+                                            <button type="button" class="button button-secondary" onclick="copyToClipboard('<?php echo esc_js($signature['dps_xml_gzip_b64']); ?>')">
+                                                📋 <?php _e('Copiar dpsXmlGZipB64', 'wc-nfse'); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <p class="signature-error">❌ <?php printf(__('Falha na assinatura digital: %s', 'wc-nfse'), esc_html($signature['error'] ?? '')); ?></p>
                             <?php endif; ?>
@@ -545,7 +560,7 @@ $recent_orders = wc_get_orders(array(
     </div>
 
     <!-- XSD Validation Demonstration Tab -->
-    <div id="xsd-validation" class="tab-content" style="display: none;">
+    <div id="xsd-validation" class="tab-content" <?php echo $active_tab !== '#xsd-validation' ? 'style="display: none;"' : ''; ?>>
         <h2><?php _e('Demonstração de Validação XSD', 'wc-nfse'); ?></h2>
 
         <div class="notice notice-info">
@@ -559,6 +574,7 @@ $recent_orders = wc_get_orders(array(
         </div>
 
         <form method="post" id="xsd-validation-form">
+            <input type="hidden" name="active_tab" value="#xsd-validation">
             <table class="form-table">
                 <tr>
                     <th scope="row">
@@ -686,10 +702,11 @@ $recent_orders = wc_get_orders(array(
     </div>
 
     <!-- Manual Emission Tab -->
-    <div id="manual-emission" class="tab-content" style="display: none;">
+    <div id="manual-emission" class="tab-content" <?php echo $active_tab !== '#manual-emission' ? 'style="display: none;"' : ''; ?>>
         <h2><?php _e('Emissão Manual de NFS-e', 'wc-nfse'); ?></h2>
 
         <form method="post">
+            <input type="hidden" name="active_tab" value="#manual-emission">
             <table class="form-table">
                 <tr>
                     <th scope="row">
@@ -767,7 +784,7 @@ $recent_orders = wc_get_orders(array(
     </div>
 
     <!-- Bulk Actions Tab -->
-    <div id="bulk-actions" class="tab-content" style="display: none;">
+    <div id="bulk-actions" class="tab-content" <?php echo $active_tab !== '#bulk-actions' ? 'style="display: none;"' : ''; ?>>
         <h2><?php _e('Ações em Lote', 'wc-nfse'); ?></h2>
 
         <div class="notice notice-info">
@@ -1284,7 +1301,7 @@ $recent_orders = wc_get_orders(array(
 
 <script>
     jQuery(document).ready(function($) {
-        // Tab functionality
+        // Tab functionality with persistence
         $('.nav-tab').click(function(e) {
             e.preventDefault();
 
@@ -1295,6 +1312,34 @@ $recent_orders = wc_get_orders(array(
 
             var target = $(this).attr('href');
             $(target).show();
+
+            // Save active tab to localStorage
+            localStorage.setItem('nfse_active_tab', target);
+        });
+
+        // Restore active tab on page load
+        var activeTab = localStorage.getItem('nfse_active_tab');
+        var phpActiveTab = '<?php echo $active_tab; ?>';
+
+        // Use PHP detected tab if available, otherwise use localStorage
+        if (phpActiveTab && phpActiveTab !== '#order-check') {
+            activeTab = phpActiveTab;
+        }
+
+        if (activeTab && $(activeTab).length) {
+            $('.nav-tab').removeClass('nav-tab-active');
+            $('.tab-content').hide();
+
+            $('a[href="' + activeTab + '"]').addClass('nav-tab-active');
+            $(activeTab).show();
+        }
+
+        // Save active tab before form submission
+        $('form[method="post"]').on('submit', function() {
+            var currentActiveTab = $('.nav-tab-active').attr('href');
+            if (currentActiveTab) {
+                localStorage.setItem('nfse_active_tab', currentActiveTab);
+            }
         });
 
         // Order selection from recent orders list
@@ -1530,4 +1575,52 @@ $recent_orders = wc_get_orders(array(
             }
         });
     });
+
+    // Function to copy text to clipboard
+    function copyToClipboard(text) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success message
+                var button = event.target;
+                var originalText = button.textContent;
+                button.textContent = '<?php _e('Copiado!', 'wc-nfse'); ?>';
+                setTimeout(function() {
+                    button.textContent = originalText;
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Erro ao copiar: ', err);
+                fallbackCopyTextToClipboard(text);
+            });
+        } else {
+            fallbackCopyTextToClipboard(text);
+        }
+    }
+
+    // Fallback function for older browsers
+    function fallbackCopyTextToClipboard(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            var successful = document.execCommand('copy');
+            if (successful) {
+                var button = event.target;
+                var originalText = button.textContent;
+                button.textContent = '<?php _e('Copiado!', 'wc-nfse'); ?>';
+                setTimeout(function() {
+                    button.textContent = originalText;
+                }, 2000);
+            }
+        } catch (err) {
+            console.error('Fallback: Erro ao copiar', err);
+        }
+
+        document.body.removeChild(textArea);
+    }
 </script>

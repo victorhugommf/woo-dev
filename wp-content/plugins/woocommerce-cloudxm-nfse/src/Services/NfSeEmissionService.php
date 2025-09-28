@@ -13,6 +13,7 @@ use CloudXM\NFSe\Api\ApiClient;
 use CloudXM\NFSe\Services\NfSeCertificateManager;
 use CloudXM\NFSe\Persistence\NfSeEmissionRepository;
 use CloudXM\NFSe\Services\NfSeRtcValidator;
+use CloudXM\NFSe\Services\NfSeCompressor;
 use Exception;
 
 /**
@@ -30,6 +31,7 @@ class NfSeEmissionService implements NfSeEmissionServiceInterface
     private NfSeCertificateManager $certificateManager;
     private NfSeEmissionRepository $emissionRepository;
     private NfSeRtcValidator $rtcValidator;
+    private NfSeCompressor $compressor;
 
     public function __construct(
         Logger $logger,
@@ -39,7 +41,8 @@ class NfSeEmissionService implements NfSeEmissionServiceInterface
         ApiClient $apiClient,
         NfSeCertificateManager $certificateManager,
         NfSeEmissionRepository $emissionRepository,
-        NfSeRtcValidator $rtcValidator
+        NfSeRtcValidator $rtcValidator,
+        NfSeCompressor $compressor
     ) {
         $this->logger = $logger;
         $this->settings = $settings;
@@ -49,6 +52,7 @@ class NfSeEmissionService implements NfSeEmissionServiceInterface
         $this->certificateManager = $certificateManager;
         $this->emissionRepository = $emissionRepository;
         $this->rtcValidator = $rtcValidator;
+        $this->compressor = $compressor;
     }
 
     /**
@@ -72,12 +76,11 @@ class NfSeEmissionService implements NfSeEmissionServiceInterface
             $certificateId = $this->getActiveCertificateId();
             $signedXml = $this->digitalSigner->signXml($dpsResult['xml'], $certificateId);
 
-            //esse método não é da apiClient - olhar compressAndEncode() da classe NfSeCompressor
-            // Compress XML for transmission
-            // $compressedXml = $this->apiClient->compressXml($signedXml);
+            // Compress XML for transmission using NfSeCompressor
+            $compressedXml = $this->compressor->compressAndEncode($signedXml);
 
             // Submit to API
-            $apiResult = $this->apiClient->submitDps($signedXml, $dpsResult['dps_data']);
+            $apiResult = $this->apiClient->submitDps($compressedXml, $dpsResult['dps_data']);
 
             // Save emission record
             $emissionId = $this->saveEmissionRecord($orderId, $apiResult, $dpsResult, $signedXml);
@@ -323,10 +326,10 @@ class NfSeEmissionService implements NfSeEmissionServiceInterface
             throw new Exception(__('Conteúdo XML não disponível.', 'wc-nfse'));
         }
 
-        // Decompress if needed
+        // Decompress if needed using NfSeCompressor
         $xmlContent = $emission['xml_content'];
         if (!preg_match('/^<\?xml/', $xmlContent)) {
-            $xmlContent = $this->apiClient->decompressXml($xmlContent);
+            $xmlContent = $this->compressor->decodeAndDecompress($xmlContent);
         }
 
         return $xmlContent;

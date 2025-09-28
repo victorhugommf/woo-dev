@@ -1,83 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<DPS xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.00">
-  <infDPS Id="DPS350010520716495100014500001000000000000041">
-    <tpAmb>2</tpAmb>
-    <dhEmi>2025-09-23T23:28:57-03:00</dhEmi>
-    <verAplic>1.0.0</verAplic>
-    <serie>1</serie>
-    <nDPS>41</nDPS>
-    <dCompet>2025-09-23</dCompet>
-    <tpEmit>1</tpEmit>
-    <cLocEmi>3500105</cLocEmi>
-    <prest>
-      <CNPJ>07164951000145</CNPJ>
-      <fone>1835215386</fone>
-      <email>financeiro@gepam.adm.br</email>
-      <regTrib>
-        <opSimpNac>1</opSimpNac>
-        <regEspTrib>0</regEspTrib>
-      </regTrib>
-    </prest>
-    <toma>
-      <CNPJ>38077662000132</CNPJ>
-      <xNome>Lefons Comercio Digital LTDA</xNome>
-      <end>
-        <endNac>
-          <cMun>3500105</cMun>
-          <CEP>17808214</CEP>
-        </endNac>
-        <xLgr>Av das Aroeiras</xLgr>
-        <nro>S/N</nro>
-        <xBairro>Centro</xBairro>
-      </end>
-      <fone>11971521133</fone>
-      <email>victorhugofons@gmail.com</email>
-    </toma>
-    <serv>
-      <locPrest>
-        <cLocPrestacao>3500105</cLocPrestacao>
-      </locPrest>
-      <cServ>
-        <cTribNac>010101</cTribNac>
-        <xDescServ>2x Camiseta Básica - R$ 99,80</xDescServ>
-      </cServ>
-      <infoCompl>
-        <docRef>Pedido WooCommerce #13</docRef>
-      </infoCompl>
-    </serv>
-    <valores>
-      <vServPrest>
-        <vServ>99.80</vServ>
-      </vServPrest>
-      <trib>
-        <tribMun>
-          <tribISSQN>1</tribISSQN>
-          <tpRetISSQN>1</tpRetISSQN>
-        </tribMun>
-        <totTrib>
-          <indTotTrib>0</indTotTrib>
-        </totTrib>
-      </trib>
-    </valores>
-  </infDPS>
-  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
-    <SignedInfo>
-      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-      <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
-      <Reference URI="#DPS350010520716495100014500001000000000000041">
-        <Transforms>
-          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-          <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-        </Transforms>
-        <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-        <DigestValue>2FSQQ8eAvMhtvj9IQVymz7EkQAw=</DigestValue>
-      </Reference>
-    </SignedInfo>
-    <SignatureValue>eMndd6IKLZvukYZJ5BzoEhV8CdDjSV+875ztHOQ/Kgg0y1N/mWC4G9qftwNLGlrqwKP80+63XiHb8liQEOwQcjE3E4M+Pw7vFK8M+RTnp4ti0cPZB9JOfngy/kh1xnI3gdV8kUgbDKTJ9nc1RjsBwOZY8a5FacEbuBrHMFJYIUAdL2IvLgLvWfnaQ93s1RVMFJxZOcIkYtaFJClULxPFzf1XScmIg+QOpvVJwRYrxh9uA1byZmw4CYAxPlov5mNY8bGIdr65so/47WfFU8zLUMS/kp1DcQr7TkwJdO4I7JB6R4Rrjjmm5uu087DuLcilJZLIGxKkO8hRQqb2vyTWLw==</SignatureValue>
-    <KeyInfo>
-      <X509Data>
-        <X509Certificate>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</X509Certificate>
-      </X509Data>
-    </KeyInfo>
-  </Signature>
+<DPS
+	xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.00">
+	<infDPS Id="DPS350010520716495100014500001000000000000052">
+		<tpAmb>2</tpAmb>
+		<dhEmi>2025-09-28T15:48:39-03:00</dhEmi>
+		<verAplic>1.0.0</verAplic>
+		<serie>1</serie>
+		<nDPS>52</nDPS>
+		<dCompet>2025-09-28</dCompet>
+		<tpEmit>1</tpEmit>
+		<cLocEmi>3500105</cLocEmi>
+		<prest>
+			<CNPJ>07164951000145</CNPJ>
+			<fone>1835215386</fone>
+			<email>financeiro@gepam.adm.br</email>
+			<regTrib>
+				<opSimpNac>1</opSimpNac>
+				<regEspTrib>0</regEspTrib>
+			</regTrib>
+		</prest>
+		<toma>
+			<CNPJ>38077662000132</CNPJ>
+			<xNome>Lefons Comercio Digital LTDA</xNome>
+			<end>
+				<endNac>
+					<cMun>3500105</cMun>
+					<CEP>17808214</CEP>
+				</endNac>
+				<xLgr>Av das Aroeiras</xLgr>
+				<nro>S/N</nro>
+				<xBairro>Centro</xBairro>
+			</end>
+			<fone>11971521133</fone>
+			<email>victorhugofons@gmail.com</email>
+		</toma>
+		<serv>
+			<locPrest>
+				<cLocPrestacao>3500105</cLocPrestacao>
+			</locPrest>
+			<cServ>
+				<cTribNac>010101</cTribNac>
+				<xDescServ>2x Camiseta Básica - R$ 99,80</xDescServ>
+			</cServ>
+			<infoCompl>
+				<docRef>Pedido WooCommerce #13</docRef>
+			</infoCompl>
+		</serv>
+		<valores>
+			<vServPrest>
+				<vServ>99.80</vServ>
+			</vServPrest>
+			<trib>
+				<tribMun>
+					<tribISSQN>1</tribISSQN>
+					<tpRetISSQN>1</tpRetISSQN>
+				</tribMun>
+				<totTrib>
+					<indTotTrib>0</indTotTrib>
+				</totTrib>
+			</trib>
+		</valores>
+	</infDPS>
+	<Signature
+		xmlns="http://www.w3.org/2000/09/xmldsig#">
+		<SignedInfo>
+			<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+			<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+			<Reference URI="#DPS350010520716495100014500001000000000000052">
+				<Transforms>
+					<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+					<Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+				</Transforms>
+				<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+				<DigestValue>8iYBGQaFciPIcGhmtqv2zuZsDKI=</DigestValue>
+			</Reference>
+		</SignedInfo>
+		<SignatureValue>eMndd6IKLZvukYZJ5BzoEhV8CdDjSV+875ztHOQ/Kgg0y1N/mWC4G9qftwNLGlrqwKP80+63XiHb8liQEOwQcjE3E4M+Pw7vFK8M+RTnp4ti0cPZB9JOfngy/kh1xnI3gdV8kUgbDKTJ9nc1RjsBwOZY8a5FacEbuBrHMFJYIUAdL2IvLgLvWfnaQ93s1RVMFJxZOcIkYtaFJClULxPFzf1XScmIg+QOpvVJwRYrxh9uA1byZmw4CYAxPlov5mNY8bGIdr65so/47WfFU8zLUMS/kp1DcQr7TkwJdO4I7JB6R4Rrjjmm5uu087DuLcilJZLIGxKkO8hRQqb2vyTWLw==</SignatureValue>
+		<KeyInfo>
+			<X509Data>
+				<X509Certificate>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</X509Certificate>
+			</X509Data>
+		</KeyInfo>
+	</Signature>
 </DPS>

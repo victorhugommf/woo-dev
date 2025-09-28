@@ -163,7 +163,8 @@ class Factories
                 self::apiClient(),
                 self::nfSeCertificateManager(),
                 self::nfSeEmissionRepository(),
-                new NfSeRtcValidator()
+                new NfSeRtcValidator(),
+                self::nfSeCompressor()
             );
         }
         return self::$emissionService;

@@ -177,7 +177,7 @@ class NfSeDpsGenerator
         }
 
         // Add municipal registration if available
-        $inscricaoMunicipal = $this->settings->get('inscricao_municipal', '');
+        $inscricaoMunicipal = $this->settings->getPrestadorInscricaoMunicipal();
         if (!empty($inscricaoMunicipal)) {
             $data['inscricao_municipal'] = $inscricaoMunicipal;
         }

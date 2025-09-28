@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NFSe Compressor Service
  *
@@ -66,11 +67,8 @@ class NfSeCompressor
                 ));
             }
 
-            // Clean XML before compression
-            $cleanedXml = $this->cleanXml($xmlContent);
-
             // Compress using GZip
-            $compressed = gzcompress($cleanedXml, $this->compressionLevel);
+            $compressed = gzencode($xmlContent, $this->compressionLevel);
 
             if ($compressed === false) {
                 throw new Exception(__('Falha na compactação GZip do XML.', 'wc-nfse'));
@@ -101,7 +99,6 @@ class NfSeCompressor
             ]);
 
             return $encoded;
-
         } catch (Exception $e) {
             $this->logger->error('Erro na compactação do XML: ' . $e->getMessage(), [
                 'original_size' => strlen($xmlContent)
@@ -147,7 +144,6 @@ class NfSeCompressor
             ]);
 
             return $decompressed;
-
         } catch (Exception $e) {
             $this->logger->error('Erro na descompactação do XML: ' . $e->getMessage());
             throw $e;
@@ -156,8 +152,20 @@ class NfSeCompressor
 
     /**
      * Clean XML for optimal compression
+     * Made public to allow reuse in other services like NfSeDigitalSigner
      */
-    private function cleanXml(string $xmlContent): string
+    public function cleanXml(string $xmlContent): string
+    {
+        $dom = $this->cleanXmlToDom($xmlContent);
+        return $dom ? $dom->saveXML() : $xmlContent;
+    }
+
+    /**
+     * Clean XML and return DOMDocument for further processing
+     * Useful for services that need to work with the DOM after cleaning
+     * Avoids string → DOM → string → DOM conversion
+     */
+    public function cleanXmlToDom(string $xmlContent): ?DOMDocument
     {
         try {
             // Load XML
@@ -181,12 +189,10 @@ class NfSeCompressor
             // Remove empty text nodes
             $this->removeEmptyTextNodes($dom->documentElement);
 
-            // Return cleaned XML
-            return $dom->saveXML();
-
+            return $dom;
         } catch (Exception $e) {
-            $this->logger->warning('Falha na limpeza do XML, usando original: ' . $e->getMessage());
-            return $xmlContent;
+            $this->logger->warning('Falha na limpeza do XML para DOM, retornando null: ' . $e->getMessage());
+            return null;
         }
     }
 
@@ -249,7 +255,6 @@ class NfSeCompressor
                 'total_reduction' => $originalSize > 0 ? (($originalSize - $encodedSize) / $originalSize) * 100 : 0,
                 'within_limits' => $encodedSize <= ($this->maxSizeMb * 1024 * 1024)
             ];
-
         } catch (Exception $e) {
             $this->logger->error('Erro ao calcular estatísticas de compactação: ' . $e->getMessage());
             return null;
@@ -292,7 +297,6 @@ class NfSeCompressor
                     __('Teste de compactação bem-sucedido', 'wc-nfse') :
                     __('Falha na verificação de integridade', 'wc-nfse')
             ];
-
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -418,7 +422,6 @@ class NfSeCompressor
                     'encoded_size' => strlen($encoded),
                     'execution_time_ms' => round(($endTime - $startTime) * 1000, 2)
                 ];
-
             } catch (Exception $e) {
                 $results[$index] = [
                     'success' => false,
@@ -435,8 +438,12 @@ class NfSeCompressor
 
         $this->logger->info('Compactação em lote concluída', [
             'total_items' => count($xmlArray),
-            'successful' => count(array_filter($results, function($r) { return $r['success']; })),
-            'failed' => count(array_filter($results, function($r) { return !$r['success']; })),
+            'successful' => count(array_filter($results, function ($r) {
+                return $r['success'];
+            })),
+            'failed' => count(array_filter($results, function ($r) {
+                return !$r['success'];
+            })),
             'total_execution_time_ms' => round($totalExecutionTime, 2)
         ]);
 
@@ -503,11 +510,11 @@ class NfSeCompressor
             'libxml_available' => function_exists('libxml_use_internal_errors')
         ];
 
-        $allMet = array_reduce($requirements, function($carry, $item) {
+        $allMet = array_reduce($requirements, function ($carry, $item) {
             return $carry && $item;
         }, true);
 
-        $missingReqs = array_keys(array_filter($requirements, function($met) {
+        $missingReqs = array_keys(array_filter($requirements, function ($met) {
             return !$met;
         }));
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Admin settings page template
  */
@@ -75,11 +76,11 @@ if (!defined('ABSPATH')) {
                 </tr>
                 <tr>
                     <th scope="row">
-                        <label for="prestador_inscricao_municipal"><?php _e('Inscrição Municipal', 'wc-nfse'); ?> <span class="required">*</span></label>
+                        <label for="prestador_inscricao_municipal"><?php _e('Inscrição Municipal', 'wc-nfse'); ?></label>
                     </th>
                     <td>
-                        <input type="text" id="prestador_inscricao_municipal" name="prestador_inscricao_municipal" value="<?php echo esc_attr($settings['prestador_inscricao_municipal'] ?? ''); ?>" class="regular-text" required>
-                        <p class="description"><?php _e('Inscrição municipal do prestador no município de prestação do serviço.', 'wc-nfse'); ?></p>
+                        <input type="text" id="prestador_inscricao_municipal" name="prestador_inscricao_municipal" value="<?php echo esc_attr($settings['prestador_inscricao_municipal'] ?? ''); ?>" class="regular-text">
+                        <p class="description"><?php _e('Inscrição municipal do prestador no município de prestação do serviço (opcional).', 'wc-nfse'); ?></p>
                     </td>
                 </tr>
                 <tr>
@@ -178,7 +179,7 @@ if (!defined('ABSPATH')) {
                         <select id="prestador_uf" name="prestador_uf" required>
                             <option value=""><?php _e('Selecione o estado', 'wc-nfse'); ?></option>
                             <?php foreach ($states as $uf => $name): ?>
-                            <option value="<?php echo esc_attr($uf); ?>" <?php selected($settings['prestador_uf'] ?? '', $uf); ?>><?php echo esc_html($name); ?></option>
+                                <option value="<?php echo esc_attr($uf); ?>" <?php selected($settings['prestador_uf'] ?? '', $uf); ?>><?php echo esc_html($name); ?></option>
                             <?php endforeach; ?>
                         </select>
                         <p class="description"><?php _e('Estado onde está localizada a empresa.', 'wc-nfse'); ?></p>
@@ -207,7 +208,7 @@ if (!defined('ABSPATH')) {
                     <td>
                         <select id="regime_tributario" name="regime_tributario">
                             <?php foreach ($tax_regimes as $regime => $name): ?>
-                            <option value="<?php echo esc_attr($regime); ?>" <?php selected($settings['regime_tributario'] ?? 'simples_nacional', $regime); ?>><?php echo esc_html($name); ?></option>
+                                <option value="<?php echo esc_attr($regime); ?>" <?php selected($settings['regime_tributario'] ?? 'simples_nacional', $regime); ?>><?php echo esc_html($name); ?></option>
                             <?php endforeach; ?>
                         </select>
                         <p class="description"><?php _e('Regime tributário da empresa para cálculo de impostos.', 'wc-nfse'); ?></p>
@@ -244,102 +245,101 @@ if (!defined('ABSPATH')) {
 </div>
 
 <script>
-jQuery(document).ready(function($) {
+    jQuery(document).ready(function($) {
 
-    // CNPJ formatting
-    $('#prestador_cnpj').on('input', function() {
-        var value = $(this).val().replace(/\D/g, '');
-        if (value.length <= 14) {
-            value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
-            $(this).val(value);
-        }
-    });
-
-    // CEP formatting
-    $('#prestador_cep').on('input', function() {
-        var value = $(this).val().replace(/\D/g, '');
-        if (value.length <= 8) {
-            value = value.replace(/^(\d{5})(\d{3})$/, '$1-$2');
-            $(this).val(value);
-        }
-    });
-
-    // Phone formatting
-    $('#prestador_telefone').on('input', function() {
-        var value = $(this).val().replace(/\D/g, '');
-        if (value.length <= 11) {
-            if (value.length === 11) {
-                value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-            } else if (value.length === 10) {
-                value = value.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
-            }
-            $(this).val(value);
-        }
-    });
-
-    // Form submission
-    $('#wc-nfse-settings-form').on('submit', function(e) {
-        e.preventDefault();
-
-        var $form = $(this);
-        var $button = $('#wc-nfse-save-settings');
-        var $spinner = $form.find('.spinner');
-
-        $button.prop('disabled', true);
-        $spinner.addClass('is-active');
-
-        var formData = $form.serialize() + '&action=wc_nfse_save_settings';
-
-        $.ajax({
-            url: ajaxurl,
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    // Show success message
-                    $('<div class="notice notice-success is-dismissible"><p>' + response.data.message + '</p></div>')
-                        .insertAfter('.wrap h1')
-                        .delay(3000)
-                        .fadeOut();
-                } else {
-                    // Show error message
-                    $('<div class="notice notice-error is-dismissible"><p>' + response.data.message + '</p></div>')
-                        .insertAfter('.wrap h1');
-                }
-            },
-            error: function() {
-                $('<div class="notice notice-error is-dismissible"><p><?php _e("Erro ao salvar configurações. Tente novamente.", "wc-nfse"); ?></p></div>')
-                    .insertAfter('.wrap h1');
-            },
-            complete: function() {
-                $button.prop('disabled', false);
-                $spinner.removeClass('is-active');
+        // CNPJ formatting
+        $('#prestador_cnpj').on('input', function() {
+            var value = $(this).val().replace(/\D/g, '');
+            if (value.length <= 14) {
+                value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+                $(this).val(value);
             }
         });
+
+        // CEP formatting
+        $('#prestador_cep').on('input', function() {
+            var value = $(this).val().replace(/\D/g, '');
+            if (value.length <= 8) {
+                value = value.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+                $(this).val(value);
+            }
+        });
+
+        // Phone formatting
+        $('#prestador_telefone').on('input', function() {
+            var value = $(this).val().replace(/\D/g, '');
+            if (value.length <= 11) {
+                if (value.length === 11) {
+                    value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+                } else if (value.length === 10) {
+                    value = value.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+                }
+                $(this).val(value);
+            }
+        });
+
+        // Form submission
+        $('#wc-nfse-settings-form').on('submit', function(e) {
+            e.preventDefault();
+
+            var $form = $(this);
+            var $button = $('#wc-nfse-save-settings');
+            var $spinner = $form.find('.spinner');
+
+            $button.prop('disabled', true);
+            $spinner.addClass('is-active');
+
+            var formData = $form.serialize() + '&action=wc_nfse_save_settings';
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        // Show success message
+                        $('<div class="notice notice-success is-dismissible"><p>' + response.data.message + '</p></div>')
+                            .insertAfter('.wrap h1')
+                            .delay(3000)
+                            .fadeOut();
+                    } else {
+                        // Show error message
+                        $('<div class="notice notice-error is-dismissible"><p>' + response.data.message + '</p></div>')
+                            .insertAfter('.wrap h1');
+                    }
+                },
+                error: function() {
+                    $('<div class="notice notice-error is-dismissible"><p><?php _e("Erro ao salvar configurações. Tente novamente.", "wc-nfse"); ?></p></div>')
+                        .insertAfter('.wrap h1');
+                },
+                complete: function() {
+                    $button.prop('disabled', false);
+                    $spinner.removeClass('is-active');
+                }
+            });
+        });
     });
-});
 </script>
 
 <style>
-.wc-nfse-settings .form-table th {
-    width: 200px;
-}
+    .wc-nfse-settings .form-table th {
+        width: 200px;
+    }
 
-.required {
-    color: #dc3232;
-}
+    .required {
+        color: #dc3232;
+    }
 
-.wc-nfse-settings-section {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-top: none;
-    padding: 20px;
-    margin-bottom: 20px;
-}
+    .wc-nfse-settings-section {
+        background: #fff;
+        border: 1px solid #ccd0d4;
+        border-top: none;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
 
-.spinner {
-    float: none;
-    margin-left: 10px;
-}
+    .spinner {
+        float: none;
+        margin-left: 10px;
+    }
 </style>
-
